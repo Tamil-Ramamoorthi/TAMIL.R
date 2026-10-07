@@ -1,0 +1,83 @@
+/* ==========================================================================
+   CUSTOM CURSOR
+   Only mounted on fine-pointer devices with motion allowed. The native cursor
+   is hidden solely while the custom one is active, so touch and keyboard users
+   are never left without an affordance.
+   ========================================================================== */
+
+html[data-cursor-active="true"],
+html[data-cursor-active="true"] a,
+html[data-cursor-active="true"] button,
+html[data-cursor-active="true"] [role="button"] {
+  cursor: none;
+}
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-cursor);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.cursor__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--c-accent-bright);
+  will-change: transform;
+}
+
+.cursor__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border: 1px solid var(--c-line-strong);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  will-change: transform, opacity;
+}
+
+.cursor__label {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  opacity: 0;
+  white-space: nowrap;
+  will-change: opacity;
+}
+
+/* State-driven styling; GSAP handles the scale/position tweens. */
+.cursor[data-state="hover"] .cursor__ring {
+  border-color: var(--c-accent-line);
+  background: var(--c-accent-wash);
+}
+
+.cursor[data-state="view"] .cursor__ring {
+  border-color: transparent;
+  background: var(--c-accent);
+}
+
+.cursor[data-state="view"] .cursor__label {
+  opacity: 1;
+}
+
+.cursor[data-state="view"] .cursor__dot {
+  opacity: 0;
+}
+
+.cursor[data-state="text"] .cursor__ring {
+  opacity: 0;
+}

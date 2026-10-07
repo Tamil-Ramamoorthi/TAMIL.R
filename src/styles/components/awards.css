@@ -1,0 +1,789 @@
+/* ==========================================================================
+   ACHIEVEMENTS, CERTIFICATIONS & RESEARCH — grouped editorial ledgers
+
+   Four ledgers rather than one certificate wall. Each row carries the same
+   accent-edge / mono-metadata / oversized-title language as Projects,
+   Experience and Education, so this reads as the fourth member of that
+   system rather than a gallery bolted on.
+
+   Hierarchy is handled with `[data-featured]`: a featured row gets the larger
+   type scale and an accent marker beside its ordinal. Nothing is hidden.
+   ========================================================================== */
+
+.awards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-gap);
+}
+
+/* ---------- Group header ---------- */
+
+.awards__group-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--c-line-strong);
+}
+
+.awards__group-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-bright);
+}
+
+.awards__group-caption {
+  flex: 1 1 14rem;
+  font-size: var(--fs-body-s);
+  color: var(--c-text-3);
+}
+
+.awards__group-count {
+  font-size: var(--fs-micro);
+  color: var(--c-text-4);
+}
+
+.awards__ledger {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Row ---------- */
+
+/* Row chrome and the accent edge live in ledger.css. */
+
+/*
+   COLUMNS
+   -------
+   Every column starts on the same top line (`align-items: start`): the
+   metadata, the title and the certificate share one edge rather than each
+   being centred in its own box.
+
+     < 52rem   one column, in reading order: metadata → body → certificate
+     52–64rem  metadata | body; the certificate drops under the BODY, on its
+               left edge, instead of into the narrow metadata column
+     ≥ 64rem   metadata | body | certificate  (3 : 8 : 3 ≈ 21% / 57% / 21%)
+     ≥ 82rem   rows with BOTH a figure and a certificate take a fourth column
+
+   The fourth column is keyed on `data-figure`, not on `data-media` alone. A
+   certificate row with no figure used to land its certificate in the narrow
+   figure track and leave the last track empty.
+*/
+.awards__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  row-gap: var(--sp-5);
+  column-gap: var(--sp-6);
+  padding-block: clamp(1.5rem, 0.9rem + 1.8vw, 2.5rem);
+  padding-left: var(--sp-4);
+}
+
+@media (min-width: 52rem) {
+  .awards__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+  }
+
+  .awards__grid[data-media="true"] > .awards__media {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 64rem) {
+  .awards__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 8fr) minmax(0, 3fr);
+    column-gap: var(--sp-7);
+  }
+
+  .awards__grid[data-media="true"][data-figure="false"] > .awards__media {
+    grid-column: 3;
+  }
+}
+
+@media (min-width: 82rem) {
+  .awards__grid[data-media="true"][data-figure="true"] {
+    grid-template-columns:
+      minmax(0, 3fr) minmax(0, 7fr) minmax(0, 2fr)
+      minmax(0, 4fr);
+  }
+
+  .awards__grid[data-media="true"][data-figure="true"] > .awards__media {
+    grid-column: auto;
+  }
+}
+
+/* ---------- Metadata column ----------
+   One left edge, one rhythm. The ordinal and the kind label read as a pair;
+   everything below is spaced evenly at --sp-3. */
+
+.awards__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.awards__index {
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  /* Pulls the kind label up under the ordinal: a net gap of --sp-1. */
+  margin-bottom: calc(var(--sp-1) - var(--sp-3));
+}
+
+/* Featured marker: a single accent tick beside the ordinal. */
+.awards__item[data-featured="true"] .awards__index::after {
+  content: "";
+  display: inline-block;
+  width: 0.4rem;
+  height: 1px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  background: var(--c-accent);
+}
+
+/* What the certificate confirms — "Participant", "First Class", "Runner-up". */
+.awards__credential {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.awards__item[data-featured="true"] .awards__credential {
+  color: var(--c-accent-bright);
+}
+
+.awards__date {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* ---------- Body ----------
+   Spacing is set per element rather than by one flex gap, so the title,
+   company and detail line hold together as a heading block, and the
+   description, tags and links each step down from it by a larger, consistent
+   interval. */
+
+.awards__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.awards__title {
+  font-weight: 700;
+  font-size: var(--fs-h4);
+  line-height: 1.1;
+}
+
+/* Featured rows get the stronger type scale and uppercase treatment. */
+.awards__item[data-featured="true"] .awards__title {
+  font-size: clamp(1.375rem, 0.95rem + 1.5vw, 2rem);
+  text-transform: uppercase;
+}
+
+.awards__org {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+.awards__detail {
+  margin-top: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.awards__desc {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  max-width: var(--maxw-text);
+}
+
+/* An honest caveat, e.g. where a certificate is only partly legible. */
+.awards__note {
+  margin-top: var(--sp-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  line-height: 1.6;
+  color: var(--c-text-4);
+  max-width: 44ch;
+}
+
+.awards__related {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.awards__related:hover,
+.awards__related:focus-visible {
+  color: var(--c-accent-bright);
+}
+
+.awards__related-icon {
+  font-size: 0.9em;
+  transition: transform var(--d-base) var(--e-out-quart);
+}
+
+.awards__related:hover .awards__related-icon {
+  transform: translateX(3px);
+}
+
+/* ---------- Figure (CGPA, WPM, duration) ---------- */
+
+.awards__figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  align-self: start;
+}
+
+.awards__metric {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--c-text);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.awards__item:hover .awards__metric {
+  color: var(--c-accent-bright);
+}
+
+/* ---------- Certificate preview ----------
+   Hidden entirely until a real image is supplied — see CertificateViewer.
+   -------------------------------------------------------------------------- */
+
+.cert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.cert__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  transition: border-color var(--d-base) var(--e-soft);
+}
+
+.cert__frame:hover,
+.cert__frame:focus-visible {
+  border-color: var(--c-accent-line);
+}
+
+.cert__frame img {
+  display: block;
+  width: 100%;
+  /* A fixed ratio keeps a row of certificate photographs aligned; the crop
+     is governed by the supplied image, not by a transform. */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+  transition: transform var(--d-slow) var(--e-out-quart);
+}
+
+@media (hover: hover) {
+  .cert__frame:hover img {
+    transform: scale(1.02);
+  }
+}
+
+.cert__hint {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text);
+  background: linear-gradient(
+    0deg,
+    rgba(3, 5, 10, 0.92),
+    rgba(3, 5, 10, 0)
+  );
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition: opacity var(--d-base) var(--e-soft),
+    transform var(--d-base) var(--e-out-quart);
+}
+
+.cert__frame:hover .cert__hint,
+.cert__frame:focus-visible .cert__hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cert__caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* ---------- Lightbox ----------
+   Native <dialog>: the top layer, the focus trap and Escape are the
+   platform's. Only the look is ours.
+   -------------------------------------------------------------------------- */
+
+.lightbox {
+  width: min(96vw, 72rem);
+  max-width: none;
+  max-height: 92vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--c-text);
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgba(3, 5, 10, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-quality="low"] .lightbox::backdrop {
+  backdrop-filter: none;
+}
+
+.lightbox__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  max-height: 92vh;
+}
+
+.lightbox__close {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-end;
+  gap: var(--sp-2);
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-2);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-sm);
+  background: var(--c-bg-1);
+  transition: color var(--d-fast) var(--e-soft),
+    border-color var(--d-fast) var(--e-soft);
+}
+
+.lightbox__close:hover,
+.lightbox__close:focus-visible {
+  color: var(--c-text);
+  border-color: var(--c-accent-line);
+}
+
+.lightbox__close svg {
+  transform: rotate(90deg);
+}
+
+.lightbox__image {
+  display: block;
+  width: 100%;
+  max-height: 76vh;
+  object-fit: contain;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  background: var(--c-bg);
+}
+
+.lightbox__caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  text-align: center;
+}
+
+.lightbox[open] {
+  animation: lightbox-in var(--d-base) var(--e-out-quart);
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Reduced motion: state without movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .awards__related:hover .awards__related-icon,
+  .cert__frame:hover img {
+    transform: none;
+  }
+
+  .cert__hint {
+    transform: none;
+  }
+
+  .lightbox[open] {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   RESEARCH / PUBLICATION — editorial paper card
+
+   Deliberately not a ledger row and deliberately not a certificate frame: a
+   conference paper is the strongest item in this section, so it leads it and
+   carries the largest type. A solid panel rather than a bordered row, which
+   separates it from the ledgers below without introducing a new visual
+   language.
+   ========================================================================== */
+
+.research {
+  margin-bottom: var(--block-gap);
+}
+
+.research__item {
+  position: relative;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.022),
+    rgba(255, 255, 255, 0)
+  );
+  padding: clamp(1.25rem, 0.8rem + 1.8vw, 2.5rem);
+  transition: border-color var(--d-base) var(--e-soft);
+}
+
+.research__item:hover {
+  border-color: var(--c-line-strong);
+}
+
+/* The accent edge lives in ledger.css. */
+
+.research__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.research__kind {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-bright);
+}
+
+.research__index {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.12em;
+  color: var(--c-text-4);
+}
+
+.research__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-6);
+}
+
+/* The first-page preview takes a column only once it has been supplied. */
+@media (min-width: 64rem) {
+  .research__grid[data-media="true"] {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    column-gap: var(--sp-8);
+    align-items: start;
+  }
+}
+
+.research__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.research__title {
+  font-weight: 700;
+  font-size: clamp(1.625rem, 1rem + 2.2vw, 2.875rem);
+  text-transform: uppercase;
+  max-width: 24ch;
+}
+
+.research__subtitle {
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-snug);
+  color: var(--c-text-2);
+  max-width: 34ch;
+}
+
+.research__byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-4);
+  margin-top: var(--sp-2);
+}
+
+.research__author {
+  font-size: var(--fs-body-s);
+  color: var(--c-text);
+}
+
+.research__institution {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.research__focus {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  max-width: var(--maxw-text);
+}
+
+.research__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.research__topic {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xs);
+  transition: color var(--d-base) var(--e-soft),
+    border-color var(--d-base) var(--e-soft);
+}
+
+.research__item:hover .research__topic {
+  border-color: var(--c-accent-line);
+}
+
+/* ---------- Specification list ---------- */
+
+.research__specs {
+  display: grid;
+  gap: var(--sp-4);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--c-line);
+}
+
+@media (min-width: 40rem) {
+  .research__specs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sp-6);
+  }
+}
+
+.research__spec dd {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+/* ---------- Actions ---------- */
+
+.research__actions,
+.awards__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+}
+
+/* Full-width tap targets once the card is stacked. */
+@media (max-width: 36rem) {
+  .research__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .research__actions > .btn {
+    justify-content: center;
+  }
+}
+
+/* ---------- First-page preview ----------
+   An export of the paper's own first page — never a designed cover.
+   -------------------------------------------------------------------------- */
+
+.research__preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  max-width: 22rem;
+}
+
+.research__preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  background: var(--c-bg);
+}
+
+.research__preview-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+
+/* ==========================================================================
+   PHASE 4F FINAL — kind labels, skill tags, related lists, certificate CTA
+   ========================================================================== */
+
+/* Small editorial label: Achievement / Certification / Hackathon / Credential. */
+.awards__kind {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-bright);
+  margin-bottom: var(--sp-1);
+}
+
+/* Quieter on a non-featured row, so the label never outweighs the title. */
+.awards__item[data-featured="false"] .awards__kind {
+  color: var(--c-text-3);
+}
+
+.awards__skills {
+  margin-top: var(--sp-5);
+  /* One gap on both axes, so wrapped rows read as an even field. */
+  gap: var(--sp-2);
+  padding-top: 0;
+  max-width: var(--maxw-text);
+}
+
+/* Compact tags here — these sit beneath a description, not on their own.
+   A fixed height with horizontal-only padding keeps every chip the same
+   height whatever its label. */
+.awards__skills .stack__item {
+  min-height: 1.875rem;
+  padding: 0 0.7rem;
+  font-size: var(--fs-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.awards__related-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+}
+
+.awards__related-desc {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-body-s);
+  color: var(--c-text-3);
+  max-width: var(--maxw-text);
+}
+
+/* Explicit CTA beneath the thumbnail; opens the same dialog. */
+.cert__action {
+  align-self: stretch;
+  justify-content: center;
+  margin-top: var(--sp-1);
+}
+
+/* ---------- Media column: certificate plus an optional supporting visual ---- */
+
+.awards__media,
+.research__media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: 22rem;
+}
+
+/* A supporting reference, not a centrepiece: capped, and centred when
+   stacked or in its own column. Image, caption and CTA share one width, since
+   `.cert__action` stretches to the figure. */
+.awards__media {
+  justify-self: center;
+  width: 100%;
+  max-width: 20rem;
+}
+
+@media (min-width: 52rem) {
+  .awards__media {
+    justify-self: start;
+    max-width: 18rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .awards__grid[data-media="true"][data-figure="false"] > .awards__media {
+    justify-self: center;
+    /* Drops the image top to the title's cap line rather than its line box. */
+    padding-top: 0.2rem;
+  }
+}
+
+/* The conference organiser, set under the venue rather than beside it. */
+.research__organizer {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-micro);
+  color: var(--c-text-3);
+}

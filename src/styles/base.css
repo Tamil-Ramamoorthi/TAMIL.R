@@ -1,0 +1,212 @@
+/* ==========================================================================
+   BASE — document, typography primitives, focus, scrollbar
+   ========================================================================== */
+
+body {
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  overflow-x: hidden;
+}
+
+/* Locked while the preloader is on screen or the mobile menu is open. */
+body[data-scroll-locked='true'] {
+  overflow: hidden;
+}
+
+::selection {
+  background: var(--c-accent);
+  color: #fff;
+}
+
+/* ---------- Focus ---------- */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-accent-bright);
+  outline-offset: 3px;
+  border-radius: var(--r-xs);
+}
+
+/* ---------- Scrollbar ---------- */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--c-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--c-bg-3);
+    border: 3px solid var(--c-bg);
+    border-radius: var(--r-pill);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--c-accent-deep);
+  }
+}
+
+html {
+  scrollbar-color: var(--c-bg-3) var(--c-bg);
+  scrollbar-width: thin;
+}
+
+/* ---------- Typography primitives ---------- */
+
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-display);
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+}
+
+.t-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+}
+
+.t-h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-h4);
+  line-height: 1.26;
+  letter-spacing: var(--ls-heading);
+}
+
+.t-lead {
+  font-size: var(--fs-lead);
+  font-weight: 300;
+  line-height: 1.38;
+  letter-spacing: -0.015em;
+  color: var(--c-text);
+}
+
+.t-body {
+  font-size: var(--fs-body);
+  color: var(--c-text-2);
+}
+
+.t-body-l {
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-loose);
+  color: var(--c-text-2);
+}
+
+.t-small {
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+/* Small uppercase letter-spaced technical labels. */
+.t-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.t-label--accent {
+  color: var(--c-accent-bright);
+}
+
+.t-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0.02em;
+}
+
+.t-accent {
+  color: var(--c-accent-bright);
+}
+
+.t-dim {
+  color: var(--c-text-3);
+}
+
+/* Oversized low-contrast background typography. */
+.t-ghost {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--fs-mega);
+  line-height: 0.76;
+  letter-spacing: var(--ls-mega);
+  text-transform: uppercase;
+  color: transparent;
+  /*
+    The outline was 1px against glyphs up to 22rem tall — proportionally
+    hairline, which is why the word read as nothing. Scaling the stroke with
+    the type keeps it an outline rather than making it bold.
+  */
+  -webkit-text-stroke: clamp(1px, 0.14vw, 2px) var(--c-ghost-stroke);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.t-ghost--fill {
+  -webkit-text-stroke: 0;
+  color: var(--c-ghost-fill);
+}
+
+/* ---------- Links ---------- */
+.link {
+  position: relative;
+  display: inline-block;
+  color: var(--c-text);
+  transition: color var(--d-fast) var(--e-soft);
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--d-base) var(--e-out-expo);
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--c-accent-bright);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}

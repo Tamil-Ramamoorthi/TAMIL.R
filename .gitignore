@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+.vite
+
+# Cached segmentation model for scripts/extract-portrait.py (~176 MB)
+scripts/.cache/
+__pycache__/

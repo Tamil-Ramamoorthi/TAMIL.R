@@ -1,0 +1,178 @@
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyboard-only skip link. */
+.skip-link {
+  position: fixed;
+  top: var(--sp-3);
+  left: var(--sp-3);
+  z-index: calc(var(--z-preloader) + 1);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--c-accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  border-radius: var(--r-sm);
+  transform: translateY(-250%);
+  transition: transform var(--d-base) var(--e-out-expo);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.u-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.u-stack-2 {
+  gap: var(--sp-2);
+}
+.u-stack-3 {
+  gap: var(--sp-3);
+}
+.u-stack-4 {
+  gap: var(--sp-4);
+}
+.u-stack-5 {
+  gap: var(--sp-5);
+}
+.u-stack-6 {
+  gap: var(--sp-6);
+}
+
+.u-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.u-wrap {
+  flex-wrap: wrap;
+}
+
+.u-measure {
+  max-width: var(--maxw-text);
+}
+
+.u-nowrap {
+  white-space: nowrap;
+}
+
+.u-clip {
+  overflow: hidden;
+}
+
+.u-relative {
+  position: relative;
+}
+
+/* Hides decorative layers from pointers and selection. */
+.u-decor {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- Reveal primitives ----------
+   Hidden initial states apply ONLY when <html> carries `anim-ready`, which
+   main.tsx sets after GSAP is live AND motion is allowed. Without JS, or with
+   prefers-reduced-motion, every element stays visible and readable.
+   -------------------------------------------------------------------------- */
+
+html.anim-ready .u-reveal {
+  opacity: 0;
+  transform: translate3d(0, 1.75rem, 0);
+  will-change: opacity, transform;
+}
+
+html.anim-ready .u-reveal-fade {
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* Line-by-line text mask: children slide up out of an overflow-hidden parent. */
+.u-mask-lines > * {
+  display: block;
+}
+
+html.anim-ready .u-mask-lines {
+  overflow: hidden;
+}
+
+html.anim-ready .u-mask-lines > * {
+  transform: translate3d(0, 110%, 0);
+  will-change: transform;
+}
+
+/* ---------- Visibility helpers ---------- */
+.u-only-desktop {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .u-only-desktop {
+    display: revert;
+  }
+  .u-only-mobile {
+    display: none !important;
+  }
+}
+
+/* ---------- Grain / vignette overlays ----------
+   The grain file lives in src/assets so Vite hashes it and rewrites the URL
+   for whatever `base` the site is deployed under.
+   -------------------------------------------------------------------------- */
+.overlay-grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sticky);
+  pointer-events: none;
+  opacity: 0.38;
+  mix-blend-mode: soft-light;
+  background-image: url("../assets/grain.svg");
+  background-repeat: repeat;
+}
+
+.overlay-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sticky);
+  pointer-events: none;
+  background: radial-gradient(
+    120% 90% at 50% 38%,
+    transparent 42%,
+    rgba(3, 5, 10, 0.58) 100%
+  );
+}
+
+:root[data-quality="low"] .overlay-grain {
+  display: none;
+}
+
+/* ---------- Global reduced-motion backstop ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

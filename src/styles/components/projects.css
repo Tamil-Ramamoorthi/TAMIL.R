@@ -1,0 +1,420 @@
+/* ==========================================================================
+   PROJECTS — editorial ledger with expandable detail
+
+   One row per project: ordinal, category label, oversized title, descriptor
+   and stack metadata. Hover raises the hierarchy (accent edge, ordinal, cue)
+   rather than lifting or scaling a card. The accent edge matches the Tech
+   Stack treatment so the two sections read as one system.
+   ========================================================================== */
+
+.projects__ledger {
+  border-top: 1px solid var(--c-line);
+}
+
+/* Row chrome and the accent edge live in ledger.css. */
+
+/* The heading is purely structural — the button inside it carries the row. */
+.project__heading {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- Row header ---------- */
+
+.project-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  padding-block: clamp(1.5rem, 0.8rem + 2vw, 2.5rem);
+  padding-left: var(--sp-4);
+  text-align: left;
+}
+
+.project-row__num {
+  align-self: start;
+  padding-top: 0.5rem;
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  /* Overrides the ledger default: in Projects the ordinal is an accent. */
+  color: var(--c-accent-bright);
+}
+
+.project-row__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.project-row__category {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.project:hover .project-row__category {
+  color: var(--c-accent-bright);
+}
+
+.project-row__title {
+  font-weight: 700;
+  font-size: clamp(1.5rem, 0.9rem + 2.4vw, 3rem);
+  text-transform: uppercase;
+}
+
+.project-row__sub {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+}
+
+.project-row__tags {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-2);
+}
+
+@media (min-width: 48rem) {
+  .project-row__tags {
+    display: flex;
+  }
+}
+
+.project-row__tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+/* Metadata lifts with the row rather than staying flat on hover. */
+.project:hover .project-row__tag {
+  color: var(--c-text-2);
+}
+
+.project-row__tag--more {
+  color: var(--c-text-3);
+}
+
+.project-row__aside {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+/* Desktop-only affordance; the chevron carries the state on small screens. */
+.project-row__cue {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+@media (min-width: 62rem) {
+  .project-row__cue {
+    display: inline-block;
+  }
+}
+
+.project:hover .project-row__cue,
+.project[data-open="true"] .project-row__cue {
+  color: var(--c-text-2);
+}
+
+.project-row__chev {
+  font-size: 1.1rem;
+  color: var(--c-text-3);
+  transition: transform var(--d-base) var(--e-out-expo),
+    color var(--d-base) var(--e-soft);
+}
+
+.project-row[aria-expanded="true"] .project-row__chev {
+  transform: rotate(90deg);
+  color: var(--c-accent-bright);
+}
+
+/* ---------- Status chip ---------- */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  white-space: nowrap;
+}
+
+.status__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c-text-4);
+}
+
+.status[data-status="live"] .status__dot {
+  background: var(--c-live);
+}
+
+.status[data-status="in-progress"] .status__dot {
+  background: var(--c-wip);
+}
+
+.status[data-status="completed"] .status__dot {
+  background: var(--c-accent-bright);
+}
+
+/* ---------- Expandable detail ---------- */
+.project-detail {
+  overflow: hidden;
+  /* Collapsed by default; GSAP animates to and from `auto`. */
+  height: 0;
+}
+
+.project-detail__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--block-gap);
+  padding-block: var(--sp-5) var(--sp-7);
+  padding-left: var(--sp-4);
+}
+
+/*
+   Two columns only when a screenshot has actually been supplied. Without
+   media the prose gets the full measure instead of leaving an empty column —
+   which is why the split is driven by data, not by the breakpoint alone.
+*/
+@media (min-width: 62rem) {
+  .project-detail__inner[data-media="true"] {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    column-gap: var(--sp-8);
+    align-items: start;
+  }
+}
+
+.project-detail__block + .project-detail__block {
+  margin-top: var(--sp-5);
+}
+
+.project-detail__lede {
+  margin-top: var(--sp-3);
+  max-width: var(--maxw-text);
+  color: var(--c-text-2);
+}
+
+.project-detail__block > .t-label + * {
+  margin-top: var(--sp-3);
+}
+
+/* ---------- Features ---------- */
+
+.project-detail__features {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.project-detail__feature {
+  position: relative;
+  padding-left: var(--sp-5);
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+}
+
+.project-detail__feature::before {
+  content: "";
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 0.75rem;
+  height: 1px;
+  background: var(--c-accent);
+}
+
+/* ---------- Reported metrics ---------- */
+
+.project-detail__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.project-detail__metric {
+  flex: 1 1 10rem;
+  padding: var(--sp-4);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+}
+
+.project-detail__metric dt {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+}
+
+.project-detail__metric dd {
+  margin-top: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  letter-spacing: var(--ls-heading);
+  color: var(--c-text);
+}
+
+/* The attribution that keeps a reported number from reading as a benchmark. */
+.project-detail__footnote {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-micro);
+  line-height: 1.6;
+  color: var(--c-text-3);
+  max-width: 48ch;
+}
+
+.project-detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-top: var(--sp-6);
+}
+
+/* Full-width tap targets once the row is stacked. */
+@media (max-width: 36rem) {
+  .project-detail__links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .project-detail__links > .btn {
+    justify-content: center;
+  }
+}
+
+/* Links whose URL has not been supplied yet. */
+.btn[aria-disabled="true"] {
+  opacity: 0.4;
+  pointer-events: none;
+  border-style: dashed;
+}
+
+/* ---------- Screenshot carousel ---------- */
+.project-detail__media {
+  position: relative;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.carousel__viewport {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+}
+
+.carousel__track {
+  display: flex;
+  will-change: transform;
+}
+
+.carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.carousel__slide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform var(--d-slow) var(--e-out-quart);
+}
+
+@media (hover: hover) {
+  .carousel__viewport:hover .carousel__slide img {
+    transform: scale(1.015);
+  }
+}
+
+.carousel__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+
+.carousel__dots {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.carousel__dot {
+  width: 1.5rem;
+  height: 2px;
+  background: var(--c-line-strong);
+  border-radius: var(--r-pill);
+  transition: background-color var(--d-base) var(--e-soft);
+}
+
+.carousel__dot[aria-current="true"] {
+  background: var(--c-accent-bright);
+}
+
+.carousel__nav {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.carousel__btn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  color: var(--c-text-2);
+  transition: border-color var(--d-fast) var(--e-soft),
+    color var(--d-fast) var(--e-soft);
+}
+
+.carousel__btn:hover:not(:disabled) {
+  border-color: var(--c-accent-line);
+  color: var(--c-text);
+}
+
+.carousel__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel__caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+}
+
+/* ---------- Reduced motion: state without movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .carousel__viewport:hover .carousel__slide img {
+    transform: none;
+  }
+}

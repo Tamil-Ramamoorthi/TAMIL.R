@@ -1,0 +1,11 @@
+export { Hero } from "./Hero";
+export { About } from "./About";
+export { WhatIDo } from "./WhatIDo";
+export { TechStack } from "./TechStack";
+export { Projects } from "./Projects";
+export { ProjectRow } from "./ProjectRow";
+export { ScreenshotCarousel } from "./ScreenshotCarousel";
+export { Experience } from "./Experience";
+export { Education } from "./Education";
+export { Achievements } from "./Achievements";
+export { Contact } from "./Contact";

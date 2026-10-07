@@ -1,0 +1,186 @@
+/* ==========================================================================
+   CONTACT + FOOTER
+   ========================================================================== */
+
+.contact {
+  position: relative;
+  overflow: hidden;
+}
+
+.contact__statement {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-h1);
+  line-height: 0.96;
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+  max-width: 24ch;
+}
+
+.contact__statement em {
+  font-style: normal;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--c-accent-line);
+}
+
+.contact__grid {
+  display: grid;
+  margin-top: var(--block-gap);
+  border-top: 1px solid var(--c-line);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.contact__cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-5);
+  border-bottom: 1px solid var(--c-line);
+}
+
+@media (min-width: 48rem) {
+  .contact__cell {
+    padding-inline: var(--sp-5);
+    border-left: 1px solid var(--c-line);
+  }
+  .contact__cell:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.contact__value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--c-text);
+  word-break: break-word;
+}
+
+/* ---------- Supporting copy + primary CTA ---------- */
+
+.contact__intro {
+  margin-top: var(--sp-5);
+  max-width: var(--maxw-text);
+  color: var(--c-text-2);
+}
+
+.contact__cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4) var(--sp-5);
+  margin-top: var(--sp-6);
+}
+
+.contact__cta-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* Full-width tap target once the row is stacked. */
+@media (max-width: 36rem) {
+  .contact__cta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .contact__cta > .btn {
+    justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   SITE FOOTER
+   Rendered outside <main>. Minimal by design: identity, channels, notice.
+   ========================================================================== */
+
+.site-footer {
+  position: relative;
+  z-index: var(--z-content);
+  border-top: 1px solid var(--c-line);
+  background: var(--c-void);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding-block: var(--sp-6);
+}
+
+@media (min-width: 52rem) {
+  .site-footer__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-6);
+  }
+}
+
+.site-footer__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.site-footer__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  letter-spacing: var(--ls-heading);
+  text-transform: uppercase;
+  color: var(--c-text);
+}
+
+.site-footer__role {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  color: var(--c-text-3);
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-5);
+}
+
+.site-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.site-footer__link:hover,
+.site-footer__link:focus-visible {
+  color: var(--c-text);
+}
+
+.site-footer__icon {
+  font-size: 0.95em;
+  color: var(--c-text-4);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.site-footer__link:hover .site-footer__icon,
+.site-footer__link:focus-visible .site-footer__icon {
+  color: var(--c-accent-bright);
+}
+
+.site-footer__copy {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}

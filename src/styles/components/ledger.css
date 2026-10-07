@@ -1,0 +1,155 @@
+/* ==========================================================================
+   LEDGER — the shared language of the four editorial ledgers
+
+   Projects, Experience, Education and Achievements/Research were each built
+   with their own copy of the same accent-edge rule, the same ordinal hover and
+   the same reduced-motion reset. Five near-identical copies of a "constant" is
+   one place for them to drift apart, so they live here once and the section
+   stylesheets keep only what is genuinely their own (grid, metadata, media).
+
+   This file is imported BEFORE the section stylesheets, so a section can still
+   override anything here when it has a reason to.
+
+   Nothing in this file changes how the page looks. It is the same values,
+   stated once.
+   ========================================================================== */
+
+/* ---------- Row chrome ---------- */
+
+.project,
+.exp__entry,
+.edu__entry,
+.awards__item,
+.stack__group {
+  position: relative;
+  border-bottom: 1px solid var(--c-line);
+  transition: background-color var(--d-base) var(--e-soft);
+}
+
+.project:hover,
+.project[data-open="true"],
+.exp__entry:hover,
+.edu__entry:hover,
+.awards__item:hover,
+.stack__group:hover {
+  background-color: var(--c-row-hover);
+}
+
+/* ---------- The accent rule that grows down the left edge ---------- */
+
+.project__edge,
+.exp__edge,
+.edu__edge,
+.awards__edge,
+.research__edge,
+.stack__edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: var(--c-accent);
+  transform: scaleY(0);
+  transform-origin: top center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--d-base) var(--e-out-quart),
+    opacity var(--d-base) var(--e-soft);
+}
+
+.project:hover > .project__edge,
+.project:focus-within > .project__edge,
+.project[data-open="true"] > .project__edge,
+.exp__entry:hover > .exp__edge,
+.exp__entry:focus-within > .exp__edge,
+.edu__entry:hover > .edu__edge,
+.edu__entry:focus-within > .edu__edge,
+.awards__item:hover > .awards__edge,
+.awards__item:focus-within > .awards__edge,
+.research__item:hover > .research__edge,
+.research__item:focus-within > .research__edge,
+.stack__group:hover > .stack__edge,
+.stack__group:focus-within > .stack__edge {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+/* ---------- Ordinal ---------- */
+
+.project-row__num,
+.exp__index,
+.edu__index,
+.awards__index,
+.stack__index {
+  font-family: var(--font-mono);
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft),
+    transform var(--d-base) var(--e-out-quart);
+}
+
+.project:hover .project-row__num,
+.project[data-open="true"] .project-row__num,
+.exp__entry:hover .exp__index,
+.edu__entry:hover .edu__index,
+.awards__item:hover .awards__index,
+.stack__group:hover .stack__index {
+  color: var(--c-accent-bright);
+  transform: translateX(var(--ledger-nudge));
+}
+
+/* ---------- Title ----------
+   Size stays with each section — a project headline is deliberately larger
+   than a credential. Everything else about the type is shared.
+   -------------------------------------------------------------------------- */
+
+.project-row__title,
+.exp__role,
+.edu__degree,
+.awards__title,
+.research__title {
+  font-family: var(--font-display);
+  line-height: var(--lh-ledger);
+  letter-spacing: var(--ls-heading);
+  color: var(--c-text);
+  /* Long single words (URLs, compound titles) never widen the page. */
+  overflow-wrap: anywhere;
+  transition: transform var(--d-slow) var(--e-out-quart);
+}
+
+/* Restrained: the title shifts, it never scales. Pointer devices only. */
+@media (min-width: 48rem) and (hover: hover) {
+  .project:hover .project-row__title,
+  .exp__entry:hover .exp__role,
+  .edu__entry:hover .edu__degree,
+  .awards__item:hover .awards__title {
+    transform: translateX(var(--ledger-shift));
+  }
+}
+
+/* ---------- Reduced motion: state without movement ----------
+   The edge is pinned visible rather than removed, so a hovered row still
+   reads as hovered. One block for every ledger.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .project__edge,
+  .exp__edge,
+  .edu__edge,
+  .awards__edge,
+  .research__edge,
+  .stack__edge {
+    transform: scaleY(1);
+  }
+
+  .project:hover .project-row__title,
+  .project:hover .project-row__num,
+  .exp__entry:hover .exp__role,
+  .exp__entry:hover .exp__index,
+  .edu__entry:hover .edu__degree,
+  .edu__entry:hover .edu__index,
+  .awards__item:hover .awards__title,
+  .awards__item:hover .awards__index,
+  .stack__group:hover .stack__index {
+    transform: none;
+  }
+}

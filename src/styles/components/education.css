@@ -1,0 +1,207 @@
+/* ==========================================================================
+   EDUCATION — numbered academic ledger
+
+   Replaces the former `.timeline` system, which by this point only Education
+   used. Rather than leave Experience on `.exp` and Education on a separately
+   styled timeline, this file brings Education into the same language: accent
+   left edge, mono metadata column, oversized award type.
+
+   Structurally it is a three-column ledger — metadata / body / score — which
+   is where it legitimately differs from Experience: an academic record has one
+   figure worth isolating, and a CGPA earns the right-hand column that a
+   certificate occupies in Experience.
+   ========================================================================== */
+
+.edu {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--c-line);
+}
+
+/* Row chrome and the accent edge live in ledger.css. */
+
+.edu__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  padding-block: clamp(1.75rem, 1rem + 2vw, 3rem);
+  padding-left: var(--sp-4);
+}
+
+@media (min-width: 52rem) {
+  .edu__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    column-gap: var(--sp-7);
+    align-items: start;
+  }
+}
+
+/* The score moves out to its own column once there is room for it. */
+@media (min-width: 70rem) {
+  .edu__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr) minmax(0, 3fr);
+  }
+}
+
+/* ---------- Metadata column ---------- */
+
+.edu__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.edu__index {
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  margin-bottom: var(--sp-2);
+}
+
+.edu__dates {
+  font-size: var(--fs-body-s);
+  color: var(--c-accent-bright);
+}
+
+.edu__place {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* ---------- Body column ---------- */
+
+.edu__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.edu__stage {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.edu__entry:hover .edu__stage {
+  color: var(--c-accent-bright);
+}
+
+.edu__degree {
+  font-weight: 700;
+  font-size: clamp(1.375rem, 0.95rem + 1.7vw, 2.25rem);
+  text-transform: uppercase;
+}
+
+.edu__org {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* Typographic institution marker — no logo asset exists, so none is faked. */
+.edu__mark {
+  display: grid;
+  place-items: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  padding-inline: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  color: var(--c-text-3);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xs);
+  transition: color var(--d-base) var(--e-soft),
+    border-color var(--d-base) var(--e-soft);
+}
+
+.edu__entry:hover .edu__mark {
+  color: var(--c-accent-bright);
+  border-color: var(--c-accent-line);
+}
+
+.edu__institution {
+  font-size: var(--fs-body);
+  color: var(--c-text);
+}
+
+/* Subordinate to the institution — the awarding body, not a second school. */
+.edu__university {
+  font-size: var(--fs-body-s);
+  color: var(--c-text-3);
+}
+
+.edu__details {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.edu__detail {
+  position: relative;
+  padding-left: var(--sp-5);
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+.edu__detail::before {
+  content: "";
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 0.75rem;
+  height: 1px;
+  background: var(--c-accent-line);
+}
+
+/* ---------- Score ----------
+   A bordered figure, not a dashboard metric: no chart, no bar, and the value
+   always carries its denominator so it cannot read as a percentage.
+   -------------------------------------------------------------------------- */
+
+.edu__score {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  align-self: start;
+  padding: var(--sp-4);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  transition: border-color var(--d-base) var(--e-soft);
+}
+
+.edu__entry:hover .edu__score {
+  border-color: var(--c-accent-line);
+}
+
+.edu__score-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  letter-spacing: var(--ls-heading);
+  color: var(--c-text);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.edu__entry:hover .edu__score-value {
+  color: var(--c-accent-bright);
+}
+
+/* Full width while stacked, its own column from 70rem up. */
+@media (min-width: 52rem) and (max-width: 69.99rem) {
+  .edu__score {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* ---------- Reduced motion: state without movement ---------- */
+

@@ -1,0 +1,707 @@
+/* ==========================================================================
+   HERO
+   Layer order (bottom → top):
+     1. .hero__ghost     oversized background typography
+     2. .hero__scene     WebGL canvas (3D character + environment)
+     3. .hero__stage     reserved slot for the Phase 2 cursor reveal
+     4. .hero__content   identity typography + CTAs
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding-top: var(--nav-h);
+}
+
+/* ---------- Layer 1: background word ---------- */
+.hero__ghost {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  z-index: var(--z-behind);
+}
+
+/* ---------- Layer 2: WebGL scene ---------- */
+.hero__scene {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-canvas);
+}
+
+/* ---------- Layer 3: identity stage (portrait + Phase 2 reveal) ----------
+
+   Mobile / tablet : in the normal flow, above the headline, size-capped so it
+                     never pushes the name and CTAs off screen.
+   Desktop         : absolutely positioned right-hand column.
+   ------------------------------------------------------------------------- */
+.hero__stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: 100%;
+  /* .hero already reserves the navbar height, so only the absolute desktop
+     variant below needs to account for it again. */
+  padding: var(--sp-4) var(--gutter) 0;
+}
+
+@media (min-width: 48rem) {
+  .hero__stage {
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 62rem) {
+  .hero__stage {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    width: min(46%, 36rem);
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--nav-h) + var(--sp-5)) var(--gutter) var(--sp-8) 0;
+  }
+}
+
+/* ---------- Identity wrapper ----------
+   Holds the portrait and the technology orbit, and exists only to give the
+   orbit a positioned ancestor and one element to read interaction from.
+
+   It must be layout-transparent: `.hero__stage` previously aligned the portrait
+   directly, and its alignment changes three times across the breakpoints. Rather
+   than duplicate those rules (and let them drift), both alignment properties are
+   pulled through with `inherit`, so the portrait lands exactly where it did
+   before this wrapper existed.
+
+   The orbit is positioned from the portrait's measured rect, not from this box,
+   so this deliberately does NOT try to shrink-wrap the frame. */
+.hero__identity {
+  position: relative;
+  display: flex;
+  width: 100%;
+  justify-content: inherit;
+  align-items: inherit;
+}
+
+/* ---------- Portrait frame ----------
+   Both identity layers share this box.
+
+   The ratio is 4 / 5 at EVERY breakpoint because that is the asset's own
+   ratio (777 x 971). Matching it exactly is what keeps the portrait honest:
+   object-fit: cover then scales the image to the frame and crops nothing, so
+   the face, hair, shoulders and shirt survive at every width, and the crop
+   anchor never has to rescue anything. Responsiveness is therefore a matter
+   of width alone — the frame only ever gets bigger or smaller, never tighter.
+
+   Fixing the ratio also means the frame reserves its space before the image
+   decodes, so there is no layout shift.
+
+   If the ratio here and the asset's ratio ever diverge, cover starts trimming
+   again: keep them in step, and keep `hero-ai.jpg` at 777 x 971 too.
+   ------------------------------------------------------------------------- */
+.hero__portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-width: 13rem;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--r-sm);
+  background-color: var(--c-bg-1);
+  isolation: isolate;
+}
+
+@media (min-width: 30rem) {
+  .hero__portrait {
+    max-width: 15rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .hero__portrait {
+    max-width: 19rem;
+  }
+}
+
+@media (min-width: 62rem) {
+  .hero__portrait {
+    /* 29rem = 464px against a native 777px, so it is still downscaled. */
+    max-width: 29rem;
+  }
+}
+
+/* 4 / 5 is a tall box. On short laptop screens cap it by height instead, so
+   the portrait never collides with the navbar or runs past the fold. */
+@media (min-width: 62rem) and (max-height: 52rem) {
+  .hero__portrait {
+    max-width: 24rem;
+  }
+}
+
+@media (min-width: 62rem) and (max-height: 40rem) {
+  .hero__portrait {
+    max-width: 18rem;
+  }
+}
+
+.hero__portrait-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* cover, but with the frame locked to the asset's own 4 / 5 it has nothing
+     to trim — it just scales. It stays `cover` rather than `contain` so a
+     sub-pixel rounding gap can never show the panel colour at an edge. */
+  object-fit: cover;
+  /* Centre. Nothing is cropped, so this is inert; it exists so the frame
+     still behaves if a future asset arrives at a different ratio. Overridden
+     per asset via the `focus` field in src/config/assets.ts. */
+  object-position: 50% 50%;
+  /* Barely-there grade so the photograph sits on a navy page. The magenta
+     cast is already gone from the asset itself, so this no longer has to
+     correct anything. The subject is not retouched — presentation only. */
+  filter: saturate(0.96) contrast(1.02);
+}
+
+/* The AI layer sits in exactly the same box, revealed only by a mask. It is
+   never transformed independently of the layer beneath it.
+
+   `slice` on the SVG is the same fit computation `cover` performs on the
+   clean <img> above, and the viewBox is the asset's own 777 x 971 grid, so
+   the two layers resolve to identical geometry. Matching the clean plate's
+   grade keeps them reading as one photograph through the reveal. */
+.hero__portrait-ai {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: saturate(0.96) contrast(1.02);
+}
+
+/* ---------- Phase 3B: the dominant AI layer ----------
+   The same AI plate at FULL coverage, sitting above the masked one. Its opacity
+   is the hero's transformation progress, written once per frame by
+   HeroPortrait.
+
+   Geometry is copied from `.hero__portrait-img` rather than from the SVG layer:
+   both are <img> with `object-fit: cover` in the same box, so this layer and the
+   clean plate beneath it resolve identically — no sub-pixel drift as it fades
+   up. The grade matches the other two, so all three read as one photograph.
+
+   z-index 1 puts it level with the masked layer, and source order then places it
+   above: once this reaches full opacity the cursor reveal is covered, which is
+   what makes the AI identity final rather than a glimpse. */
+.hero__portrait-ai-full {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  pointer-events: none;
+  filter: saturate(0.96) contrast(1.02);
+  /* Opacity is driven from JS; declaring no transition keeps the two from
+     fighting over the same property. */
+  will-change: opacity;
+}
+
+/* The mask shape. The organic edge costs real rasterisation, so weak devices
+   fall back to feathering alone — still soft, still irregular from the
+   spline itself, just without the fractal warp. */
+.hero__reveal-shape {
+  filter: url(#hero-reveal-fx);
+}
+
+[data-quality="low"] .hero__reveal-shape {
+  filter: url(#hero-reveal-fx-soft);
+}
+
+/* Colour grade: ties the portrait into the blue system.
+
+   This was built at 0.55 to fight the magenta rim in the old mockup-derived
+   image. That magenta is now neutralised in the asset itself, so at full
+   strength this layer would simply paint the face blue. Dropped to a tint
+   that reads as lighting rather than as recolouring.
+   Tune the opacity here, or delete this layer, without touching anything else. */
+.hero__portrait-grade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.2;
+  mix-blend-mode: soft-light;
+  background: linear-gradient(
+    155deg,
+    var(--c-accent-bright) 0%,
+    var(--c-accent) 45%,
+    var(--c-accent-deep) 100%
+  );
+}
+
+/* Seats the photograph into the dark page instead of ending on a hard edge.
+   The 4 / 5 frame is shorter than the old 9 / 16 one, so the bottom fade is
+   pulled in to match — it should cover the cut-off torso, not the shirt. */
+.hero__portrait-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to top,
+      var(--c-bg) 0%,
+      rgba(5, 7, 13, 0.5) 9%,
+      rgba(5, 7, 13, 0) 26%
+    ),
+    radial-gradient(
+      125% 95% at 50% 38%,
+      rgba(5, 7, 13, 0) 52%,
+      rgba(5, 7, 13, 0.5) 100%
+    );
+}
+
+.hero__portrait-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border: 1px solid var(--c-line);
+  border-radius: inherit;
+}
+
+.hero__portrait-frame::before,
+.hero__portrait-frame::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--c-accent-line);
+}
+
+.hero__portrait-frame::before {
+  top: 10px;
+  left: 10px;
+  border-width: 1px 0 0 1px;
+}
+
+.hero__portrait-frame::after {
+  bottom: 10px;
+  right: 10px;
+  border-width: 0 1px 1px 0;
+}
+
+/* ---------- Layer 4: content ---------- */
+.hero__content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding: var(--sp-7) var(--gutter) clamp(2rem, 1rem + 3vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 0.8rem + 1.6vw, 2.25rem);
+  pointer-events: none;
+}
+
+/* Re-enable pointers only on genuinely interactive children so the hero
+   surface stays available to the cursor-driven reveal. */
+.hero__content a,
+.hero__content button {
+  pointer-events: auto;
+}
+
+.hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.hero__eyebrow-line {
+  width: clamp(1.5rem, 4vw, 3.5rem);
+  height: 1px;
+  background: var(--c-accent);
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Desktop only, where the portrait becomes an absolutely positioned right-hand
+   column and the headline runs underneath it.
+
+   "Ramamoorthi" is one unbreakable 11-character word, so it cannot wrap out of
+   the way — at --fs-display it measures ~1215px and reaches x≈1267, while the
+   portrait column starts near x≈920. The name was therefore being drawn across
+   the face. (This predates the 4:5 portrait; the old 9:16 frame had it too.)
+
+   6.4vw keeps the headline large while ending it clear of the portrait at
+   every desktop width from 62rem up — measured clearance is +18px at the
+   62rem boundary, widening to ~175px at 1600. Tablet and mobile are
+   untouched: there the portrait sits above the content in normal flow and
+   nothing overlaps. */
+@media (min-width: 62rem) {
+  .hero__title {
+    font-size: clamp(3.25rem, 6.4vw, 9rem);
+  }
+}
+
+/* overflow:hidden has no effect on an inline box, so each line mask must be
+   a block for the mask-up reveal to clip. */
+.hero__title .u-clip {
+  display: block;
+  overflow: hidden;
+}
+
+.hero__title-line {
+  display: block;
+}
+
+/* Pre-animation states for the entrance timeline in src/animations/hero.ts.
+   Applied only under `anim-ready`, so without JS or with reduced motion the
+   hero renders fully visible. */
+html.anim-ready .hero__title-line {
+  transform: translate3d(0, 110%, 0);
+  will-change: transform;
+}
+
+html.anim-ready [data-hero-step] {
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+  will-change: opacity, transform;
+}
+
+.hero__title-line--accent {
+  color: var(--c-text);
+  -webkit-text-stroke: 1px var(--c-accent-line);
+}
+
+.hero__role {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  /*
+    Lifted from secondary to primary. It sits over the scene rather than the
+    flat page background, so it needs more headroom than body copy elsewhere —
+    but it stays at label size, so the name is still unambiguously the
+    strongest thing in the hero.
+  */
+  color: var(--c-text);
+}
+
+/* The pipe carries the accent instead of being another grey glyph. */
+.hero__role-sep {
+  margin-inline: var(--sp-3);
+  color: var(--c-accent-bright);
+}
+
+.hero__keywords {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.hero__keyword {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text);
+}
+
+.hero__keyword::before {
+  content: "\2022";
+  margin-right: var(--sp-3);
+  color: var(--c-accent);
+}
+
+.hero__keyword:first-child::before {
+  display: none;
+}
+
+/* ==========================================================================
+   ATMOSPHERE — blue ambient lighting
+
+   Layered between the WebGL scene (z 1) and the identity stage (z 2), so it
+   lights the background without ever washing over the portrait or the type.
+
+   Everything here is a gradient. No `filter: blur()`, no extra texture: a
+   blurred layer this size is a full-screen repaint on every composite, and the
+   hero already has a canvas and a masked portrait competing for that budget.
+   ========================================================================== */
+
+.hero__atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    /* Key light — behind and slightly above the portrait column. */
+    radial-gradient(
+      46% 52% at 74% 34%,
+      rgba(46, 108, 246, 0.2) 0%,
+      rgba(46, 108, 246, 0.07) 42%,
+      transparent 72%
+    ),
+    /* Cool fill under the identity typography, so the type sits on light
+       rather than on flat black. */
+      radial-gradient(
+        58% 44% at 16% 76%,
+        rgba(77, 132, 255, 0.11) 0%,
+        transparent 68%
+      ),
+    /* A thin horizon band — the edge lighting that separates the upper
+       scene from the lower content. */
+      linear-gradient(
+        180deg,
+        transparent 48%,
+        rgba(46, 108, 246, 0.06) 56%,
+        transparent 64%
+      );
+}
+
+/* The fill light is behind the stacked portrait on small screens, where the
+   typography sits lower; pulling it down keeps the type lit rather than the
+   gap between the two. */
+@media (max-width: 47.99rem) {
+  .hero__atmosphere {
+    background:
+      radial-gradient(
+        64% 34% at 60% 24%,
+        rgba(46, 108, 246, 0.17) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        80% 40% at 24% 82%,
+        rgba(77, 132, 255, 0.1) 0%,
+        transparent 70%
+      );
+  }
+}
+
+:root[data-quality="low"] .hero__atmosphere {
+  /* One gradient instead of three on the weakest tier. */
+  background: radial-gradient(
+    50% 50% at 72% 36%,
+    rgba(46, 108, 246, 0.14) 0%,
+    transparent 72%
+  );
+}
+
+/* ==========================================================================
+   SECONDARY TYPOGRAPHY PANEL
+
+   A translucent, angled blue plane behind the role line and the keyword row.
+   It is a lighting element, not a container: the alphas are low enough that it
+   reads as illumination on the surface rather than as a card, and both text
+   layers sit above it on z 1.
+   ========================================================================== */
+
+.hero__secondary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Matches the gap .hero__content was giving these two as separate children,
+     so introducing the wrapper changes no spacing. */
+  gap: clamp(1.25rem, 0.8rem + 1.6vw, 2.25rem);
+}
+
+.hero__panel {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  /* Bleeds past the text on every side so the edges never crowd a glyph. */
+  inset: calc(var(--sp-4) * -1) auto calc(var(--sp-4) * -1)
+    calc(var(--gutter) * -1);
+  width: min(42rem, 100% + var(--gutter) + var(--sp-6));
+  background: linear-gradient(
+    100deg,
+    rgba(46, 108, 246, 0.14) 0%,
+    rgba(46, 108, 246, 0.05) 46%,
+    transparent 88%
+  );
+  /* Angled trailing edge — the futuristic cut, done with geometry. */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 2.5rem) 100%, 0 100%);
+}
+
+/* Thin accent rule down the leading edge. */
+.hero__panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--gutter);
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--c-accent) 22%,
+    var(--c-accent-bright) 50%,
+    var(--c-accent) 78%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__panel {
+    transition: opacity var(--d-slow) var(--e-soft);
+  }
+}
+
+/* ---------- CTAs ----------
+   The CTAs follow the keyword row directly. `.hero__panel` bleeds --sp-4 below
+   that row, so the content gap alone would start the buttons barely clear of
+   the lit plane; this is the small clearance that keeps the row reading as the
+   next editorial beat rather than as part of the panel. */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-4);
+  margin-top: var(--sp-2);
+}
+
+/* ---------- Bottom meta bar ---------- */
+.hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--c-line);
+}
+
+.hero__meta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hero__meta-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  color: var(--c-text);
+}
+
+/* ---------- Scroll cue ---------- */
+.hero__cue {
+  display: none;
+  position: absolute;
+  right: var(--gutter);
+  bottom: clamp(2rem, 1rem + 3vw, 4rem);
+  z-index: 3;
+  align-items: center;
+  gap: var(--sp-3);
+  writing-mode: vertical-rl;
+}
+
+@media (min-width: 62rem) {
+  .hero__cue {
+    display: flex;
+  }
+}
+
+.hero__cue-track {
+  width: 1px;
+  height: 3.5rem;
+  background: var(--c-line-strong);
+  overflow: hidden;
+}
+
+.hero__cue-thumb {
+  display: block;
+  width: 100%;
+  height: 40%;
+  background: var(--c-accent-bright);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0.85rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-sm);
+  color: var(--c-text);
+  overflow: hidden;
+  transition: border-color var(--d-base) var(--e-soft),
+    color var(--d-base) var(--e-soft);
+}
+
+.btn__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--c-accent);
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition: transform var(--d-base) var(--e-out-expo);
+  z-index: 0;
+}
+
+.btn > span,
+.btn > svg {
+  position: relative;
+  z-index: 1;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--c-accent);
+  color: #fff;
+}
+
+.btn:hover .btn__fill,
+.btn:focus-visible .btn__fill {
+  transform: scaleY(1);
+}
+
+.btn--primary {
+  border-color: var(--c-accent);
+  background: var(--c-accent);
+  color: #fff;
+}
+
+.btn--primary .btn__fill {
+  background: var(--c-accent-bright);
+}
+
+.btn--ghost {
+  border-style: dashed;
+  border-color: var(--c-dash);
+}
+
+.btn--sm {
+  padding: 0.6rem 1rem;
+}

@@ -1,0 +1,86 @@
+/* ==========================================================================
+   WEBGL SCENE LAYER
+   ========================================================================== */
+
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.scene canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  /* The canvas is decorative. All pointer input is read from the shared
+     pointer store, so the canvas itself never intercepts events — text stays
+     selectable and the hero surface keeps its own hover states. */
+  pointer-events: none;
+  touch-action: pan-y;
+  outline: none;
+}
+
+/* Soft gradient that seats the scene into the page background. */
+.scene__fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 13, 0.55) 0%,
+    rgba(5, 7, 13, 0) 28%,
+    rgba(5, 7, 13, 0) 62%,
+    rgba(5, 7, 13, 0.92) 100%
+  );
+}
+
+/* ---------- Non-WebGL fallback ----------
+   Rendered whenever WebGL is unavailable, or the device tier / reduced-motion
+   setting tells us not to spend a GPU budget here.
+   -------------------------------------------------------------------------- */
+.scene-fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      60% 50% at 72% 42%,
+      var(--c-accent-wash) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, var(--c-bg-1) 0%, var(--c-bg) 70%);
+}
+
+.scene-fallback__grid {
+  position: absolute;
+  inset: -1px;
+  opacity: 0.5;
+  background-image: linear-gradient(
+      to right,
+      var(--c-line-soft) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, var(--c-line-soft) 1px, transparent 1px);
+  background-size: clamp(3rem, 6vw, 6rem) clamp(3rem, 6vw, 6rem);
+  mask-image: radial-gradient(70% 60% at 70% 45%, #000 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(
+    70% 60% at 70% 45%,
+    #000 0%,
+    transparent 78%
+  );
+}
+
+/* ---------- WebGL notice (dev-facing, visually quiet) ---------- */
+.scene__notice {
+  position: absolute;
+  left: var(--gutter);
+  bottom: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}

@@ -1,0 +1,176 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   Single source of truth for colour, type, space, motion and layering.
+   Nothing below this file should hardcode a colour or a timing value.
+   ========================================================================== */
+
+:root {
+  /* ---------- Colour: surfaces ---------- */
+  --c-void: #03050a;
+  --c-bg: #05070d; /* deep black / navy — primary background */
+  --c-bg-1: #080b14; /* raised panel */
+  --c-bg-2: #0c111c; /* card / hover surface */
+  --c-bg-3: #111826; /* strongest elevation */
+
+  /* ---------- Colour: text ---------- */
+  /*
+    A deliberately monotonic contrast ramp against --c-bg (#05070d). Every
+    step is measured, because the previous ramp bottomed out well below
+    readable: --c-text-4 sat at 2.1:1 and was carrying micro labels, dates and
+    ledger ordinals. All four now clear 4.5:1, so small text is legible, while
+    the gaps between steps stay wide enough to keep the hierarchy visible.
+
+      --c-text    ~17.0:1   primary
+      --c-text-2    9.2:1   secondary body
+      --c-text-3    7.0:1   tertiary / meta
+      --c-text-4    4.9:1   quietest labels
+  */
+  --c-text: #f2f4f8; /* white / off-white — primary */
+  --c-text-2: #a7b0c2; /* soft grey — secondary */
+  --c-text-3: #8f98ab; /* tertiary / meta */
+  --c-text-4: #747d92; /* quietest labels, ordinals, captions */
+
+  /* ---------- Colour: accent (use sparingly) ---------- */
+  --c-accent: #2e6cf6;
+  --c-accent-bright: #4d84ff;
+  --c-accent-deep: #1b49b8;
+  --c-accent-wash: rgba(46, 108, 246, 0.16);
+  --c-accent-glow: rgba(46, 108, 246, 0.38);
+  --c-accent-line: rgba(46, 108, 246, 0.55);
+
+  /* Shared hover wash for every editorial ledger row. */
+  --c-row-hover: rgba(255, 255, 255, 0.028);
+
+  /*
+    Raised surface for small data containers — technology chips, metric tiles.
+    A chip on pure transparency reads as loose text; a faint surface separates
+    the data from the background without becoming a card.
+  */
+  --c-surface-1: rgba(255, 255, 255, 0.04);
+  --c-surface-2: rgba(255, 255, 255, 0.06);
+
+  /* ---------- Ghost typography ----------
+     The oversized background word. It must stay a background element, so this
+     is a controlled lift rather than a jump: the outline roughly doubles and
+     takes a slight blue cast so it belongs to the accent family instead of
+     reading as grey haze. No glow — a text-shadow on a stroked, transparent
+     glyph smears rather than glows, and costs a paint.
+     ------------------------------------------------------------------- */
+  --c-ghost-stroke: rgba(176, 198, 255, 0.16);
+  --c-ghost-fill: rgba(176, 198, 255, 0.055);
+
+  /* ---------- Colour: lines ---------- */
+  --c-line: rgba(255, 255, 255, 0.12);
+  --c-line-soft: rgba(255, 255, 255, 0.07);
+  --c-line-strong: rgba(255, 255, 255, 0.22);
+  --c-dash: rgba(255, 255, 255, 0.18);
+
+  /* ---------- Colour: status ---------- */
+  --c-live: #3ddc97;
+  --c-wip: #f6b32e;
+
+  /* ---------- Type families ---------- */
+  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas,
+    monospace;
+
+  /* ---------- Type scale (fluid, 360px → 1600px) ---------- */
+  --fs-micro: clamp(0.5625rem, 0.53rem + 0.09vw, 0.625rem);
+  --fs-label: clamp(0.625rem, 0.59rem + 0.12vw, 0.75rem);
+  --fs-body-s: clamp(0.8125rem, 0.78rem + 0.14vw, 0.875rem);
+  --fs-body: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --fs-body-l: clamp(1.0625rem, 0.98rem + 0.36vw, 1.25rem);
+  --fs-lead: clamp(1.25rem, 1.05rem + 0.9vw, 1.875rem);
+  --fs-h4: clamp(1.125rem, 1rem + 0.55vw, 1.5rem);
+  --fs-h3: clamp(1.5rem, 1.2rem + 1.3vw, 2.25rem);
+  --fs-h2: clamp(2rem, 1.4rem + 2.6vw, 3.75rem);
+  --fs-h1: clamp(2.75rem, 1.5rem + 5.2vw, 6rem);
+  --fs-display: clamp(3.25rem, 1rem + 9.2vw, 10rem);
+  --fs-mega: clamp(5rem, -1rem + 24vw, 22rem);
+
+  /* ---------- Type metrics ---------- */
+  --lh-tight: 0.88;
+  --lh-snug: 1.04;
+  --lh-heading: 1.12;
+  --lh-body: 1.62;
+  --lh-loose: 1.78;
+
+  --ls-mega: -0.045em;
+  --ls-display: -0.038em;
+  --ls-heading: -0.025em;
+  --ls-body: -0.005em;
+  --ls-label: 0.2em;
+  --ls-label-wide: 0.28em;
+
+  /* ---------- Space ---------- */
+  --sp-0: 0;
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+  --sp-10: 8rem;
+
+  /* Fluid rhythm */
+  --gutter: clamp(1.25rem, 0.6rem + 3vw, 4rem);
+  --section-py: clamp(5rem, 3rem + 9vw, 11rem);
+  --block-gap: clamp(2.5rem, 1.5rem + 4vw, 5.5rem);
+
+  --maxw: 1560px;
+  --maxw-text: 62ch;
+  --nav-h: clamp(4rem, 3.4rem + 1.6vw, 5.25rem);
+
+  /* ---------- Radii ---------- */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+
+  /* ---------- Motion ---------- */
+  --e-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --e-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+  --e-soft: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------- Editorial ledger rhythm ----------
+     The four ledgers share one hover language; these are its constants.
+     ------------------------------------------------------------------- */
+  --lh-ledger: 1.05;
+  /* Ordinal nudge, and the larger shift the title takes. */
+  --ledger-nudge: 2px;
+  --ledger-shift: 5px;
+
+  --d-fast: 180ms;
+  --d-base: 320ms;
+  --d-slow: 620ms;
+  --d-reveal: 900ms;
+
+  /* ---------- Layering ---------- */
+  --z-behind: -1;
+  --z-canvas: 1;
+  --z-content: 10;
+  --z-sticky: 50;
+  --z-nav: 100;
+  --z-menu: 110;
+  --z-cursor: 9000;
+  --z-preloader: 9500;
+
+  /* ---------- Effects ---------- */
+  --glow-accent: 0 0 0 1px var(--c-accent-line),
+    0 0 32px -8px var(--c-accent-glow);
+  --shadow-panel: 0 24px 64px -32px rgba(0, 0, 0, 0.9);
+  --blur-panel: saturate(160%) blur(14px);
+}
+
+/* Devices that cannot afford backdrop filters / heavy glows opt out here. */
+:root[data-quality='low'] {
+  --blur-panel: none;
+  --glow-accent: 0 0 0 1px var(--c-accent-line);
+}

@@ -1,0 +1,102 @@
+/* ==========================================================================
+   ASSET PLACEHOLDERS
+   Rendered wherever a real asset has not been supplied yet. They are
+   deliberately legible as scaffolding rather than fake content, and they
+   disappear automatically once the asset is marked ready in
+   src/config/assets.ts.
+   ========================================================================== */
+
+.ph {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-4);
+  border: 1px dashed var(--c-dash);
+  border-radius: var(--r-sm);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.022) 0px,
+    rgba(255, 255, 255, 0.022) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  color: var(--c-text-3);
+  overflow: hidden;
+}
+
+.ph--ratio-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+.ph--ratio-video {
+  aspect-ratio: 16 / 9;
+}
+
+.ph--ratio-square {
+  aspect-ratio: 1 / 1;
+}
+
+.ph--fill {
+  height: 100%;
+}
+
+.ph__corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--c-accent-line);
+}
+
+.ph__corner--tl {
+  top: 8px;
+  left: 8px;
+  border-width: 1px 0 0 1px;
+}
+.ph__corner--tr {
+  top: 8px;
+  right: 8px;
+  border-width: 1px 1px 0 0;
+}
+.ph__corner--bl {
+  bottom: 8px;
+  left: 8px;
+  border-width: 0 0 1px 1px;
+}
+.ph__corner--br {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 1px 1px 0;
+}
+
+.ph__kind {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-bright);
+}
+
+.ph__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  color: var(--c-text-2);
+}
+
+.ph__path {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.02em;
+  color: var(--c-text-4);
+  word-break: break-all;
+}
+
+/* Centred variant for large reserved areas (hero stage, character slot). */
+.ph--center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

@@ -1,0 +1,142 @@
+/* ==========================================================================
+   LOADING SCREEN / PRELOADER
+   ========================================================================== */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  /* The background lives on .preloader__curtain, not here: the exit wipes the
+     curtain upwards to reveal the hero, which it can only do if the colour is
+     on a layer that sits behind the content. */
+  background-color: transparent;
+}
+
+.preloader[data-done="true"] {
+  pointer-events: none;
+}
+
+/* Oversized low-contrast background word. */
+.preloader__ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.preloader__ghost span {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: var(--fs-mega);
+  line-height: 0.8;
+  letter-spacing: var(--ls-mega);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.026);
+  white-space: nowrap;
+}
+
+.preloader__center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  text-align: center;
+  padding-inline: var(--gutter);
+}
+
+.preloader__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.2rem + 4.4vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.preloader__tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: var(--ls-label-wide);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+/* ---------- Footer row: status + counter ---------- */
+.preloader__foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--gutter);
+}
+
+.preloader__status {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.preloader__count {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 1rem + 6vw, 6rem);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.preloader__count sup {
+  font-size: 0.32em;
+  vertical-align: super;
+  color: var(--c-accent-bright);
+  margin-left: 0.1em;
+}
+
+/* ---------- Progress bar ---------- */
+.preloader__bar {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--c-line);
+  overflow: hidden;
+}
+
+.preloader__bar-fill {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(
+    to right,
+    var(--c-accent-deep),
+    var(--c-accent-bright)
+  );
+}
+
+/* ---------- Exit curtain ----------
+   GSAP slides this up over the content, then unmounts the preloader.
+   -------------------------------------------------------------------------- */
+.preloader__curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--c-bg);
+  transform-origin: top center;
+}

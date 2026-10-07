@@ -1,0 +1,257 @@
+/* ==========================================================================
+   ABOUT — typography-led, full width
+
+   No portrait column. The section is set as a vertical editorial composition
+   instead: statement, supporting columns, keywords, facts ledger. Each band
+   uses the full container width, so removing the image left no gap to fill.
+   ========================================================================== */
+
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-gap);
+}
+
+/* ---------- Opening band ---------- */
+
+.about__opening {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+@media (min-width: 60rem) {
+  .about__opening {
+    /* The statement sits beside the lede rather than under it, so the primary
+       paragraph does not run the full width at display size and the band
+       fills horizontally instead of growing taller. */
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: var(--sp-8);
+    align-items: end;
+  }
+}
+
+.about__statement {
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  max-width: 44ch;
+  padding-left: var(--sp-5);
+  border-left: 1px solid var(--c-accent-line);
+}
+
+/* ---------- Opening statement ----------
+   Scroll-highlight paragraph: words start dim and brighten as they scroll in.
+   The animation layer flips data-lit per word. Without JS they render lit.
+   -------------------------------------------------------------------------- */
+
+.about__lede {
+  font-size: var(--fs-lead);
+  font-weight: 300;
+  line-height: 1.42;
+  letter-spacing: -0.015em;
+  /* Wide, but still a readable measure at the largest step of --fs-lead. */
+  max-width: 34ch;
+}
+
+@media (min-width: 60rem) {
+  .about__lede {
+    max-width: none;
+  }
+}
+
+.about__lede .word {
+  display: inline-block;
+  white-space: pre;
+  color: var(--c-text);
+}
+
+html.anim-ready .about__lede .word {
+  /*
+    The unlit state has to stay legible on its own — on a short viewport, or
+    with the trigger part-way through, some words simply never light. This is
+    the quietest readable step, not the near-invisible one it used to be.
+  */
+  color: var(--c-text-4);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+html.anim-ready .about__lede .word[data-lit="true"] {
+  color: var(--c-text);
+}
+
+/* ---------- Supporting paragraphs ---------- */
+
+.about__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-6);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--c-line);
+}
+
+@media (min-width: 60rem) {
+  .about__columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sp-8);
+  }
+}
+
+.about__para {
+  font-size: var(--fs-body-l);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  max-width: 46ch;
+}
+
+/* ---------- Positioning keywords ---------- */
+
+.about__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.about__tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-bright);
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--c-accent-line);
+  border-radius: var(--r-xs);
+  transition: background-color var(--d-base) var(--e-soft);
+}
+
+.about__tag:hover {
+  background-color: var(--c-accent-wash);
+}
+
+/* ---------- Current focus ---------- */
+
+.about__focus {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--c-line);
+}
+
+@media (min-width: 48rem) {
+  .about__focus {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--sp-7);
+  }
+}
+
+.about__focus-label {
+  flex: none;
+}
+
+/* ---------- Highlights ----------
+   Four compact facts across the width: the counts, the award, the paper.
+   Figures, not cards — only a thin rule separates them.
+   -------------------------------------------------------------------------- */
+
+.about__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--sp-5) 0;
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--c-line);
+}
+
+.about__highlight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+@media (min-width: 48rem) {
+  .about__highlight {
+    padding-inline: var(--sp-5);
+    border-left: 1px solid var(--c-line);
+  }
+
+  .about__highlight:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.about__highlight-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-h4);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+  color: var(--c-text);
+  overflow-wrap: anywhere;
+}
+
+/*
+  A bare count reads as a figure; a sentence reads as a title. The research
+  entry puts a full paper title in the same slot that otherwise holds "2", "4"
+  and a CGPA, so that one steps down to body size instead of being set as a
+  numeral. Keyed off the long value itself, not a position, so reordering the
+  highlights cannot mis-size them.
+*/
+.about__highlight[data-long="true"] .about__highlight-value {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: var(--ls-body);
+  text-wrap: balance;
+}
+
+.about__highlight-meta {
+  font-size: var(--fs-body-s);
+  line-height: 1.5;
+  color: var(--c-text-3);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Facts ledger ----------
+   Laid out across the full width, the same device the Contact section uses
+   for its channels — the two ends of the page then rhyme.
+   -------------------------------------------------------------------------- */
+
+.about__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  border-top: 1px solid var(--c-line);
+}
+
+.about__fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-block: var(--sp-5);
+  border-bottom: 1px solid var(--c-line);
+  min-width: 0;
+}
+
+@media (min-width: 48rem) {
+  .about__fact {
+    padding-inline: var(--sp-5);
+    border-left: 1px solid var(--c-line);
+  }
+
+  .about__fact:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.about__fact-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-s);
+  line-height: 1.5;
+  color: var(--c-text);
+  /* Long values (institution, languages) wrap rather than widen the grid. */
+  overflow-wrap: anywhere;
+}

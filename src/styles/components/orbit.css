@@ -1,0 +1,258 @@
+/* ==========================================================================
+   TECHNOLOGY ORBIT
+   Three orbital layers of technology marks around the AI portrait, after the
+   hero has transformed. Positions are written as transforms by
+   TechnologyOrbit.tsx — nothing here animates a transform or an opacity, so
+   the two can never fight over the same property. (The glyph sway below is
+   on the mark INSIDE the item, never on the item itself.)
+
+   PAINT ORDER IS THE WHOLE TRICK
+   ------------------------------
+   `.orbit` deliberately has NO z-index, no transform, no filter and no
+   will-change, so it does not open a stacking context. That lets each item
+   sort itself against `.hero__portrait` inside `.hero__stage`'s context:
+
+     z-index  3   near half of an orbit — passes in front of the shirt
+     (auto)       .hero__portrait
+     z-index -1   far half of an orbit, and every guide ring — occluded
+
+   The far half being hidden behind an opaque portrait is what guarantees no
+   icon is ever drawn over the face, and it is also what makes the system read
+   as orbiting a solid object instead of sliding across a flat one.
+   ========================================================================== */
+
+.orbit {
+  position: absolute;
+  inset: 0;
+  /* Focus is proximity-based, read from the pointer store, so the orbit never
+     needs to receive events — and therefore can never swallow a CTA click. */
+  pointer-events: none;
+}
+
+/* ---------- Guide rings ----------
+   One thin ellipse per orbital layer, sized from the portrait on measure and
+   given its plane angle and lean as a transform each frame. Deliberately
+   faint: at these alphas they read as a suggestion of a path, which is the
+   point, and never as a sci-fi HUD. They sit behind the portrait, so each ring
+   visibly passes around the figure rather than across it.
+   -------------------------------------------------------------------------- */
+
+.orbit__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  display: block;
+  border: 1px solid;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Inner is the most present of the three, outer the faintest, so the stack
+   reads as depth. Static alphas, set here rather than by the ticker, so
+   every track is visible from the very first frame. */
+.orbit__ring[data-orbit-layer="inner"] {
+  border-color: color-mix(in srgb, var(--c-accent) 34%, transparent);
+}
+
+.orbit__ring[data-orbit-layer="middle"] {
+  border-color: color-mix(in srgb, var(--c-accent) 26%, transparent);
+  border-style: dashed;
+  opacity: 0.72;
+}
+
+.orbit__ring[data-orbit-layer="outer"] {
+  border-color: color-mix(in srgb, var(--c-accent) 20%, transparent);
+  opacity: 0.5;
+}
+
+/* Weak devices drop to a single track rather than three. */
+:root[data-quality="low"] .orbit__ring[data-orbit-layer="middle"],
+:root[data-quality="low"] .orbit__ring[data-orbit-layer="outer"] {
+  display: none;
+}
+
+/* ---------- Items ---------- */
+
+.orbit__item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  /* The transform below is overwritten every frame; this margin is what
+     actually centres the item on its orbital point, so the JS never has to
+     carry a translate(-50%, -50%). */
+  margin: -1.25rem 0 0 -1.25rem;
+  width: 2.5rem;
+  will-change: transform, opacity;
+  /* Depth brightness, written by the ticker in sixteenths. 1 = nearest. */
+  --orbit-near: 0.5;
+}
+
+/* The far half of the orbit, behind the portrait. */
+.orbit__item[data-behind="true"] {
+  z-index: -1;
+}
+
+/* ---------- Mark ----------
+   Dark translucent disc, hairline border, light mark, a single blue highlight.
+   No brand colour fills: the whole system has to stay inside the portfolio's
+   dark blue, so the logos read as one set of instruments rather than a
+   sheet of stickers. */
+.orbit__icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  color: var(--c-text-2);
+  background:
+    radial-gradient(
+      120% 120% at 50% 12%,
+      color-mix(in srgb, var(--c-accent) 11%, transparent),
+      transparent 68%
+    ),
+    color-mix(in srgb, var(--c-bg-1) 82%, transparent);
+  border: 1px solid var(--c-line);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--c-accent-bright) 14%, transparent),
+    0 6px 18px -12px rgb(0 0 0 / 0.8);
+  backdrop-filter: blur(6px);
+  /* Depth brightness. Driven by a custom property the ticker quantises, so
+     this recomputes a handful of times per lap instead of every frame; the
+     transition is what turns those steps back into a smooth ramp. */
+  filter: brightness(calc(0.84 + var(--orbit-near) * 0.3));
+  transition:
+    color var(--d-base) var(--e-out-quart),
+    border-color var(--d-base) var(--e-out-quart),
+    box-shadow var(--d-base) var(--e-out-quart),
+    filter 420ms var(--e-out-quart);
+}
+
+.orbit__icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* ---------- Glyph sway ----------
+   The only rotation anywhere in the orbit, and it is on the glyph, never the
+   item: ±3°, over a 7–12s period with a per-node phase written inline, so no
+   two nodes ever tilt together. Compositor-only, so the ticker never sees it. */
+.orbit__icon > * {
+  animation: orbit-sway var(--orbit-sway-duration, 9s) ease-in-out
+    var(--orbit-sway-delay, 0s) infinite alternate;
+}
+
+@keyframes orbit-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+
+/* Focused: a restrained lift, not a glow bomb. */
+.orbit__item[data-focused="true"] .orbit__icon {
+  color: var(--c-text);
+  border-color: color-mix(in srgb, var(--c-accent) 58%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--c-accent-bright) 22%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c-accent) 22%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--c-accent) 45%, transparent);
+}
+
+/* ---------- Label ----------
+   Hidden until the icon is focused, so a dozen names are never competing with
+   the headline at once. */
+.orbit__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--c-text-3);
+  opacity: 0;
+  transform: translateY(-0.25rem);
+  transition:
+    opacity var(--d-base) var(--e-out-quart),
+    transform var(--d-base) var(--e-out-quart);
+}
+
+.orbit__item[data-focused="true"] .orbit__label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Narrow viewports ----------
+   Smaller marks, and the label is always on: a touch visitor gets no hover, so
+   waiting for focus would mean never seeing a name at all. The radii need no
+   rule here — TechnologyOrbit.tsx measures the rendered icon and shrinks every
+   orbit until it clears the viewport, so the system fits by construction. */
+@media (max-width: 47.99rem) {
+  .orbit__item {
+    margin: -0.875rem 0 0 -0.875rem;
+    width: 1.75rem;
+  }
+
+  .orbit__icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.78rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .orbit__icon svg {
+    width: 0.78rem;
+    height: 0.78rem;
+  }
+
+  .orbit__label {
+    opacity: 0.72;
+    transform: none;
+  }
+
+  /* One track only on phones: three at this scale crowds the silhouette. */
+  .orbit__ring[data-orbit-layer="middle"],
+  .orbit__ring[data-orbit-layer="outer"] {
+    display: none;
+  }
+}
+
+/* Weak devices drop the blur, matching the rest of the stylesheet. */
+:root[data-quality="low"] .orbit__icon {
+  backdrop-filter: none;
+  background: var(--c-bg-1);
+}
+
+/* ---------- Reduced motion ----------
+   The ticker is never installed, so there is nothing to stop here. What is
+   left is to take the glow and the depth brightness off the table and leave
+   every mark at a flat, readable level. */
+@media (prefers-reduced-motion: reduce) {
+  .orbit__item,
+  .orbit__icon,
+  .orbit__label {
+    transition: none;
+  }
+
+  .orbit__icon {
+    filter: none;
+    box-shadow: none;
+  }
+
+  .orbit__icon > * {
+    animation: none;
+  }
+
+  .orbit__label {
+    opacity: 0.8;
+    transform: none;
+  }
+}

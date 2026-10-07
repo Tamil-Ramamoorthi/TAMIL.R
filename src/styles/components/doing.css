@@ -1,0 +1,63 @@
+/* ==========================================================================
+   WHAT I DO — dashed bracket panels
+   ========================================================================== */
+
+.doing {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+}
+
+.doing__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-height: 14rem;
+}
+
+.doing__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.doing__num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  color: var(--c-accent-bright);
+}
+
+.doing__icon {
+  font-size: 1.15rem;
+  color: var(--c-text-3);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.doing__item:hover .doing__icon {
+  color: var(--c-accent-bright);
+}
+
+.doing__desc {
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+.doing__details {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.doing__detail {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xs);
+}

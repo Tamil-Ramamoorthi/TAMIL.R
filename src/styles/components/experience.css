@@ -1,0 +1,275 @@
+/* ==========================================================================
+   EXPERIENCE — numbered editorial ledger
+
+   Deliberately NOT built on `.timeline`, which Education still uses: this
+   section needed the Projects/Tech Stack language (accent left edge, mono
+   metadata column, oversized role type) and reskinning the shared timeline
+   would have redesigned Education with it.
+
+   Shared with those sections rather than duplicated: `.stack__items` /
+   `.stack__item` for the skill tags, `.u-reveal` for the scroll reveal, and
+   every colour, space and motion token.
+   ========================================================================== */
+
+.exp {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--c-line);
+}
+
+/* Row chrome and the accent edge live in ledger.css. */
+
+.exp__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  padding-block: clamp(1.75rem, 1rem + 2vw, 3rem);
+  padding-left: var(--sp-4);
+}
+
+@media (min-width: 52rem) {
+  .exp__grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    column-gap: var(--sp-7);
+    align-items: start;
+  }
+}
+
+/*
+   Three columns — metadata, body, certificate — only once a certificate file
+   has actually been supplied. Until then the body keeps the full measure
+   instead of leaving an empty third of the row.
+*/
+@media (min-width: 70rem) {
+  .exp__grid[data-media="true"] {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr) minmax(0, 5fr);
+    column-gap: var(--sp-7);
+  }
+}
+
+/* ---------- Metadata column ---------- */
+
+.exp__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.exp__index {
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  margin-bottom: var(--sp-2);
+}
+
+.exp__dates {
+  font-size: var(--fs-body-s);
+  color: var(--c-accent-bright);
+}
+
+.exp__place {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* ---------- Body column ---------- */
+
+.exp__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.exp__role {
+  font-weight: 700;
+  font-size: clamp(1.375rem, 0.95rem + 1.7vw, 2.25rem);
+  text-transform: uppercase;
+}
+
+.exp__org {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+/* Typographic company marker — no logo asset exists, so none is faked. */
+.exp__mark {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  color: var(--c-text-3);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xs);
+  transition: color var(--d-base) var(--e-soft),
+    border-color var(--d-base) var(--e-soft);
+}
+
+.exp__entry:hover .exp__mark {
+  color: var(--c-accent-bright);
+  border-color: var(--c-accent-line);
+}
+
+.exp__company {
+  font-size: var(--fs-body);
+  color: var(--c-text);
+}
+
+.exp__type {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-text-4);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xs);
+}
+
+.exp__summary {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  max-width: var(--maxw-text);
+}
+
+/* ---------- Responsibilities ---------- */
+
+.exp__points {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.exp__point {
+  position: relative;
+  padding-left: var(--sp-5);
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+}
+
+.exp__point::before {
+  content: "";
+  position: absolute;
+  top: 0.62em;
+  left: 0;
+  width: 0.75rem;
+  height: 1px;
+  background: var(--c-accent-line);
+}
+
+.exp__block {
+  margin-top: var(--sp-3);
+}
+
+.exp__block > .t-label + * {
+  margin-top: var(--sp-3);
+}
+
+/* ---------- Related projects ---------- */
+
+.exp__related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.exp__related-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.5rem 0.85rem;
+  font-size: var(--fs-body-s);
+  color: var(--c-text-2);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  transition: color var(--d-base) var(--e-soft),
+    border-color var(--d-base) var(--e-soft),
+    background-color var(--d-base) var(--e-soft);
+}
+
+.exp__related-link:hover,
+.exp__related-link:focus-visible {
+  color: var(--c-text);
+  border-color: var(--c-accent-line);
+  background-color: var(--c-accent-wash);
+}
+
+.exp__related-icon {
+  font-size: 0.9em;
+  color: var(--c-text-4);
+  transition: transform var(--d-base) var(--e-out-quart),
+    color var(--d-base) var(--e-soft);
+}
+
+.exp__related-link:hover .exp__related-icon {
+  color: var(--c-accent-bright);
+  transform: translateX(3px);
+}
+
+/* ---------- Certificate media ----------
+   Hidden entirely until a real file is supplied; see src/data/experience.ts.
+   Capped in width so a certificate scan stays a reference, not a centrepiece.
+   -------------------------------------------------------------------------- */
+
+.exp__media {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  max-width: 26rem;
+}
+
+.exp__cert {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.exp__cert-frame {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-sm);
+  transition: border-color var(--d-base) var(--e-soft);
+}
+
+.exp__cert-frame:hover,
+.exp__cert-frame:focus-visible {
+  border-color: var(--c-accent-line);
+}
+
+.exp__cert-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform var(--d-slow) var(--e-out-quart);
+}
+
+@media (hover: hover) {
+  .exp__cert-frame:hover img {
+    transform: scale(1.015);
+  }
+}
+
+.exp__cert-caption {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-text-4);
+}
+
+/* ---------- Reduced motion: state without movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .exp__related-link:hover .exp__related-icon,
+  .exp__cert-frame:hover img {
+    transform: none;
+  }
+}

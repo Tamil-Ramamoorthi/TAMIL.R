@@ -1,0 +1,215 @@
+/* ==========================================================================
+   TECH STACK — numbered editorial ledger
+   One row per category: ordinal + label left, technologies right. No badge
+   wall, no proficiency bars, no invented percentages.
+
+   Hierarchy, strongest first: ordinal (accent) → category title (display
+   face) → caption (secondary grey) → technology names (primary contrast on a
+   faint surface). Colour is only used on the ordinal; everything else is
+   separated by face, size and weight, which is what keeps a long list from
+   turning into a badge wall.
+
+   Responsive shape:
+     < 52rem   one column — category, description, technologies, stacked
+     ≥ 52rem   two columns — category block left, chips wrapping at the right
+   ========================================================================== */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--c-line);
+}
+
+.stack__group {
+  position: relative;
+  display: grid;
+  /* MOBILE / stacked: category, description, then technologies — one column,
+     in that reading order, straight out of the source order. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  padding-block: clamp(1.75rem, 1.1rem + 2vw, 2.75rem);
+  padding-left: var(--sp-4);
+  border-bottom: 1px solid var(--c-line);
+  transition: background-color var(--d-base) var(--e-soft);
+}
+
+/* TABLET: still one column, but the technology area gets the full width to
+   wrap into, which is what keeps a six-chip category from running tall. */
+@media (min-width: 52rem) {
+  .stack__group {
+    /* 9fr rather than 7fr: the category titles are longer now ("Machine
+       Learning & AI", "Data Visualization") and the longest lists are six
+       chips, so the right column needs the room more than the left does. */
+    grid-template-columns: minmax(0, 4fr) minmax(0, 9fr);
+    column-gap: var(--sp-7);
+    align-items: start;
+  }
+}
+
+@media (min-width: 72rem) {
+  .stack__group {
+    column-gap: var(--sp-8);
+  }
+}
+
+/* Row chrome and the accent edge live in ledger.css. */
+
+/* ---------- Left column: ordinal, label, caption ---------- */
+
+.stack__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+}
+
+.stack__index {
+  flex: none;
+  font-size: var(--fs-label);
+  letter-spacing: 0.12em;
+  /* Overrides the ledger default: in Tech Stack the ordinal is an accent. */
+  color: var(--c-accent-bright);
+}
+
+.stack__titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.stack__label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  font-weight: 600;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+  color: var(--c-text);
+}
+
+.stack__icon {
+  display: inline-flex;
+  font-size: 1rem;
+  color: var(--c-text-2);
+  transition: color var(--d-base) var(--e-soft);
+}
+
+.stack__group:hover .stack__icon {
+  color: var(--c-accent-bright);
+}
+
+.stack__caption {
+  font-size: var(--fs-body-s);
+  line-height: var(--lh-body);
+  color: var(--c-text-2);
+  /* Readable measure, and narrow enough that the caption never crowds the
+     chips in the column beside it. */
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+/* ---------- Right column: the technologies ---------- */
+
+.stack__items {
+  display: flex;
+  flex-wrap: wrap;
+  /* One gap value on both axes. A longer list then reads as an even field
+     rather than as tight rows with wide columns. */
+  gap: var(--sp-3);
+  align-content: flex-start;
+  /* Chips sit on the cap line of the category title on wide screens. */
+  padding-top: 0.125rem;
+}
+
+.stack__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  /* A fixed height rather than symmetric padding: a chip carrying a note
+     ("Mathematics for AI / basics") must be exactly as tall as one that is
+     not, or a wrapped row goes ragged. */
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  font-size: var(--fs-body-s);
+  line-height: 1.2;
+  /*
+    Near-white on a faint surface. The technology names are the payload of
+    this section, so they are the one small-text element allowed primary
+    contrast; the display face, size and uppercase of the category title keep
+    the hierarchy without needing colour to do it.
+  */
+  color: var(--c-text);
+  background-color: var(--c-surface-1);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-sm);
+  transition: color var(--d-base) var(--e-soft),
+    border-color var(--d-base) var(--e-soft),
+    background-color var(--d-base) var(--e-soft),
+    transform var(--d-base) var(--e-out-quart);
+}
+
+.stack__item:hover {
+  color: var(--c-text);
+  border-color: var(--c-accent);
+  background-color: var(--c-accent-wash);
+  transform: translateY(-1px);
+}
+
+.stack__item-name {
+  /*
+    Kept on one line where it fits — "Google Gemini API" reads badly broken.
+    `anywhere` is the escape hatch so a chip can still shrink below its
+    content on a 320px viewport rather than widening the page.
+  */
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+}
+
+/* Below this the longest names are allowed to break rather than widen the
+   page. A chip that wraps grows past `min-height`, so it takes symmetric
+   padding back to stay balanced. */
+@media (max-width: 26rem) {
+  .stack__items {
+    gap: var(--sp-2);
+  }
+
+  .stack__item {
+    padding-block: 0.45rem;
+  }
+
+  .stack__item-name {
+    white-space: normal;
+  }
+}
+
+/* Optional qualifier, e.g. "basics". */
+.stack__item-note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--c-text-3);
+}
+
+.stack__item:hover .stack__item-note {
+  color: var(--c-text-3);
+}
+
+/* ---------- Soft skills: deliberately outside the technology grid ---------- */
+
+.stack__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-3) var(--sp-5);
+  margin-top: var(--sp-6);
+  padding-left: var(--sp-4);
+}
+
+.stack__aside-list {
+  font-size: var(--fs-body-s);
+  color: var(--c-text-3);
+}
+
