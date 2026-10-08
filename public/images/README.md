@@ -24,24 +24,27 @@ python scripts/check-hero-alignment.py
 
 ## How `hero-clean` was made
 
-Both files are produced by `scripts/extract-portrait.py`, which is
-deterministic — re-run it to regenerate them:
+Both files are produced by `scripts/prepare-portrait.py`, which is
+deterministic — re-run it to regenerate them, then rebuild the AI layer:
 
 ```
-python scripts/extract-portrait.py
+python scripts/prepare-portrait.py
+python scripts/make-hero-ai.py
 ```
 
-It takes the full hero mockup in `public/references/hero-design-reference.jpg`
-and keeps only the photograph: the navbar, headline, CTAs, accent pills, ghost
-typography, swooshes and pink backdrop are all removed by an alpha matte, and
-the chrome printed over the subject (the orbit swoosh and
-"( SCROLL TO EXPLORE )", across the jacket) is inpainted. The subject itself
-is only cropped and uniformly scaled to 777 x 971 — never generated, warped or
-reshaped. A final pass decontaminates the backdrop glow from the silhouette
-edge and applies a light photographic finish (chroma denoise, gentle tone
-curve, restrained luminance-only sharpening); it adds no detail and moves no
-pixel. See the script's header for the full
-stage list and for what the colour pass is and is not allowed to touch.
+Its source is the original studio photograph, kept byte-for-byte at
+`scripts/source/hero-portrait.jpg` (3072 x 2048, white backdrop). It lives
+outside `public/` so the full-resolution original is never shipped. A person
+matte, refined with an exact white-backdrop estimate at the hair outline,
+places the subject on `--c-bg-2`; the crop keeps the previous plate's 48 px
+headroom and is scaled uniformly to 777 x 971 (about 2x supersampled). A light
+finish (chroma denoise, gentle tone curve, restrained luminance-only
+sharpening) adds no detail and moves no pixel. The subject is never generated,
+warped or reshaped.
+
+`scripts/extract-portrait.py` is the earlier producer, which cut the portrait
+out of the design mockup in `public/references/`. It is kept for reference
+only: running it would overwrite the plates with the mockup portrait.
 
 `scripts/.cache/` holds the ~176 MB segmentation model; it is gitignored and
 re-downloads on demand.

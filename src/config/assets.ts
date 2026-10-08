@@ -101,12 +101,10 @@ export const assets = {
     /**
      * SUPPLIED — 777 x 971 (4:5).
      *
-     * Extracted from the design mockup in `public/references/` by
-     * `scripts/extract-portrait.py`. A person matte — not a rectangle —
-     * removes that mockup's navbar, headline, CTAs, accent pills, ghost
-     * typography and pink backdrop, and the orbit swoosh and label printed
-     * across the jacket are inpainted out. Only the photograph remains; the
-     * subject is cropped and scaled uniformly, never generated or reshaped.
+     * Built from the original studio photograph by
+     * `scripts/prepare-portrait.py`. A person matte — not a rectangle —
+     * replaces the white studio backdrop with `--c-bg-2`; the subject is
+     * cropped and scaled uniformly, never generated or reshaped.
      *
      * The hero frame is 4:5 at every breakpoint to match, so `object-fit:
      * cover` trims nothing and the face, hair and shoulders are intact at

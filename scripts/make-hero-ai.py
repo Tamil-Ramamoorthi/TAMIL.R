@@ -44,7 +44,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "public", "images", "hero-clean.png")
 OUT = os.path.join(ROOT, "public", "images", "hero-ai.jpg")
 
-JPEG_QUALITY = 93  # matches hero-clean.jpg
+JPEG_QUALITY = 95  # matches hero-clean.jpg
 SEED = 20251003
 
 # Palette, straight off the design tokens in src/styles/tokens.css
