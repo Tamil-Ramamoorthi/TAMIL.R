@@ -25,12 +25,15 @@ Stages
   2. refine     guided filter snaps the soft matte onto real image edges;
                 everything outside the dilated main blob is dropped, which is
                 what removes the pills, headline, swooshes and ghost type.
-  3. repair     overlay chrome printed ON the subject ("( SCROLL TO EXPLORE )")
-                is diffusion-inpainted, since masking cannot reach it.
+  3. repair     overlay chrome printed ON the subject (the pink orbit swoosh
+                and "( SCROLL TO EXPLORE )", both across the jacket) is
+                diffusion-inpainted, since masking cannot reach it.
   4. unmix      C = a*F + (1-a)*B solved for F along the edge band, so the
                 pink backdrop stops bleeding into the hair.
   5. colour     magenta grade neutralised; white shirt rebalanced.
-  6. crop       4:5 portrait, centred on the head, full shoulders kept.
+  6. crop       4:5 portrait, centred on the head, full shoulders kept,
+                then scaled uniformly onto the 777 x 971 grid the reveal's
+                viewBox is fixed to (src/animations/heroReveal.ts).
 
 Requires numpy, pillow, scipy, onnxruntime. The ~176 MB segmentation model is
 downloaded once into `scripts/.cache/`.
@@ -43,7 +46,13 @@ import urllib.request
 
 import numpy as np
 from PIL import Image
-from scipy.ndimage import binary_dilation, binary_fill_holes, label, uniform_filter
+from scipy.ndimage import (
+    binary_dilation,
+    binary_fill_holes,
+    label,
+    median_filter,
+    uniform_filter,
+)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "public", "references", "hero-design-reference.jpg")
@@ -57,12 +66,13 @@ MODEL_URL = (
 )
 
 BG = np.array([0x0C, 0x11, 0x1C], np.float32) / 255.0  # --c-bg-2
-SEG_PASSES = [(450, 30, 1480, 1024), (500, 60, 1440, 1024)]
-OVERLAYS = [(1128, 846, 1432, 896)]  # "( SCROLL TO EXPLORE ) | SCROLL"
-SHIRT_Y = 620  # below the chin: only garment and collar live here
+SEG_PASSES = [(470, 150, 1490, 1024), (520, 180, 1440, 1024)]
+OVERLAYS = [(1000, 690, 1400, 900)]  # orbit swoosh + "( SCROLL TO EXPLORE )"
+SHIRT_Y = 560  # below the chin: only garment and collar live here
 MAGENTA = 0.85  # how hard to pull the mockup pink grade out
 RATIO = 4 / 5
-HEADROOM = 48
+HEADROOM = 42
+OUT_SIZE = (777, 971)  # REVEAL_VIEWBOX; the hero CSS ratio is keyed to it
 JPEG_QUALITY = 90
 
 MEAN = np.array([0.485, 0.456, 0.406], np.float32)
@@ -113,10 +123,12 @@ def largest_blob(mask):
     return lab == sizes.argmax()
 
 
-def diffuse_inpaint(patch, hole, iters=600):
+def diffuse_inpaint(patch, hole, iters=600, seed=None):
+    """`seed` limits the starting fill to pixels of the surface being repaired."""
     out = patch.copy()
+    src = ~hole if seed is None else seed & ~hole
     out[hole] = np.nanmedian(
-        np.where(hole[..., None], np.nan, patch).reshape(-1, 3), axis=0
+        np.where(src[..., None], patch, np.nan).reshape(-1, 3), axis=0
     )
     for _ in range(iters):
         out[hole] = boxf(out, 2)[hole]
@@ -196,10 +208,17 @@ def main():
         sub = work[y0:y1, x0:x1]
         g = sub @ np.array([0.299, 0.587, 0.114], np.float32)
         spread = sub.max(-1) - sub.min(-1)
-        hole = binary_dilation((g < 0.80) | (spread > 0.22), iterations=4)
-        hole &= alpha[y0:y1, x0:x1] > 0.05
+        # The chrome is thin, so a wide median recovers the garment under it.
+        # Only the dark jacket is repaired: the shirt and the matte edge are
+        # left to the unmix stage.
+        surface = median_filter(g, size=15, mode="nearest")
+        jacket = binary_dilation(surface < 0.30, iterations=2)
+        # The swoosh carries a soft glow wider than its core; the fabric's own
+        # spread stays under ~0.03, so 0.045 catches the glow and not the weave.
+        hole = binary_dilation((g > surface + 0.06) | (spread > 0.045), iterations=6)
+        hole &= jacket & (alpha[y0:y1, x0:x1] > 0.05)
         print("repair  %s  %d px" % ((x0, y0, x1, y1), hole.sum()))
-        work[y0:y1, x0:x1] = diffuse_inpaint(sub, hole)
+        work[y0:y1, x0:x1] = diffuse_inpaint(sub, hole, iters=1500, seed=jacket)
 
     # 4 -- edge colour unmixing
     known = alpha < 0.08
@@ -226,6 +245,21 @@ def main():
 
     px = work[top:H, left : left + cw]
     a = alpha[top:H, left : left + cw]
+    if (cw, ch) != OUT_SIZE:
+        # Uniform scale only: the crop is already 4:5, so nothing stretches.
+        print("scale   %dx%d -> %dx%d" % ((cw, ch) + OUT_SIZE))
+        px = np.stack(
+            [
+                np.asarray(
+                    Image.fromarray(px[..., c]).resize(OUT_SIZE, Image.LANCZOS),
+                    np.float32,
+                )
+                for c in range(3)
+            ],
+            -1,
+        )
+        a = np.asarray(Image.fromarray(a).resize(OUT_SIZE, Image.LANCZOS), np.float32)
+        px, a = np.clip(px, 0, 1), np.clip(a, 0, 1)
 
     Image.fromarray((np.dstack([px, a]) * 255).astype(np.uint8), "RGBA").save(
         OUT_PNG, optimize=True

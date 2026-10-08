@@ -443,8 +443,8 @@ export const orbitLayout = {
      `centreY` is the portrait-protection invariant and the single most
      important number here. The near half of every orbit — the half that paints
      IN FRONT of the portrait — can never rise above this line, and the chin in
-     `hero-clean.jpg` measures at +0.01w below the frame centre. At +0.17w the
-     near arc therefore crosses the collar and the shirt, never the mouth,
+     `hero-clean.jpg` measures at about -0.08w, above the frame centre. At
+     +0.17w the near arc therefore crosses the collar and the tie, never the mouth,
      nose, eyes or hair, with room to spare for the icon's own radius and for
      the plane angles below. The far half passes BEHIND the portrait, which is
      opaque, so it is occluded rather than drawn over the face.

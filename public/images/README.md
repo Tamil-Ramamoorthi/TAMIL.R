@@ -34,9 +34,10 @@ python scripts/extract-portrait.py
 It takes the full hero mockup in `public/references/hero-design-reference.jpg`
 and keeps only the photograph: the navbar, headline, CTAs, accent pills, ghost
 typography, swooshes and pink backdrop are all removed by an alpha matte, and
-the one piece of chrome printed over the subject ("( SCROLL TO EXPLORE )",
-across the right shoulder) is inpainted. The subject itself is only cropped —
-never generated, warped or reshaped. See the script's header for the full
+the chrome printed over the subject (the orbit swoosh and
+"( SCROLL TO EXPLORE )", across the jacket) is inpainted. The subject itself
+is only cropped and uniformly scaled to 777 x 971 — never generated, warped or
+reshaped. See the script's header for the full
 stage list and for what the colour pass is and is not allowed to touch.
 
 `scripts/.cache/` holds the ~176 MB segmentation model; it is gitignored and

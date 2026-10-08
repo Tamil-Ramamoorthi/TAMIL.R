@@ -104,9 +104,9 @@ export const assets = {
      * Extracted from the design mockup in `public/references/` by
      * `scripts/extract-portrait.py`. A person matte — not a rectangle —
      * removes that mockup's navbar, headline, CTAs, accent pills, ghost
-     * typography and pink backdrop, and the one label printed across the
-     * shoulder is inpainted out. Only the photograph remains; the subject is
-     * cropped, never generated or reshaped.
+     * typography and pink backdrop, and the orbit swoosh and label printed
+     * across the jacket are inpainted out. Only the photograph remains; the
+     * subject is cropped and scaled uniformly, never generated or reshaped.
      *
      * The hero frame is 4:5 at every breakpoint to match, so `object-fit:
      * cover` trims nothing and the face, hair and shoulders are intact at
