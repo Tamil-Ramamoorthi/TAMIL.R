@@ -37,7 +37,10 @@ typography, swooshes and pink backdrop are all removed by an alpha matte, and
 the chrome printed over the subject (the orbit swoosh and
 "( SCROLL TO EXPLORE )", across the jacket) is inpainted. The subject itself
 is only cropped and uniformly scaled to 777 x 971 — never generated, warped or
-reshaped. See the script's header for the full
+reshaped. A final pass decontaminates the backdrop glow from the silhouette
+edge and applies a light photographic finish (chroma denoise, gentle tone
+curve, restrained luminance-only sharpening); it adds no detail and moves no
+pixel. See the script's header for the full
 stage list and for what the colour pass is and is not allowed to touch.
 
 `scripts/.cache/` holds the ~176 MB segmentation model; it is gitignored and

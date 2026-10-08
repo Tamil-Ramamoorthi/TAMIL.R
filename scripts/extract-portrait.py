@@ -31,9 +31,17 @@ Stages
   4. unmix      C = a*F + (1-a)*B solved for F along the edge band, so the
                 pink backdrop stops bleeding into the hair.
   5. colour     magenta grade neutralised; white shirt rebalanced.
-  6. crop       4:5 portrait, centred on the head, full shoulders kept,
+  6. decontam   the semi-transparent edge still carries a bright, pinkish
+                fringe from the mockup backdrop; it takes the colour of the
+                solid subject just inside it instead, and the matte is choked
+                by a fraction of a pixel.
+  7. crop       4:5 portrait, centred on the head, full shoulders kept,
                 then scaled uniformly onto the 777 x 971 grid the reveal's
                 viewBox is fixed to (src/animations/heroReveal.ts).
+  8. finish     photographic polish at output size: chroma-only denoise, a
+                gentle luminance S-curve, and restrained luminance-only
+                sharpening that is eased on skin and kept off the matte edge.
+                Nothing here moves a pixel or adds detail that is not there.
 
 Requires numpy, pillow, scipy, onnxruntime. The ~176 MB segmentation model is
 downloaded once into `scripts/.cache/`.
@@ -48,6 +56,8 @@ import numpy as np
 from PIL import Image
 from scipy.ndimage import (
     binary_dilation,
+    distance_transform_edt,
+    gaussian_filter,
     binary_fill_holes,
     label,
     median_filter,
@@ -73,7 +83,7 @@ MAGENTA = 0.85  # how hard to pull the mockup pink grade out
 RATIO = 4 / 5
 HEADROOM = 42
 OUT_SIZE = (777, 971)  # REVEAL_VIEWBOX; the hero CSS ratio is keyed to it
-JPEG_QUALITY = 90
+JPEG_QUALITY = 93
 
 MEAN = np.array([0.485, 0.456, 0.406], np.float32)
 STD = np.array([0.229, 0.224, 0.225], np.float32)
@@ -179,6 +189,91 @@ def neutralise(img, strength, shirt_y):
     return desat(out, mx2, s2, 0.92 * (strength / 0.85) * w2)
 
 
+def luma(img):
+    return img @ np.array([0.2126, 0.7152, 0.0722], np.float32)
+
+
+def gauss(x, s):
+    return gaussian_filter(x, sigma=(s, s) + (0,) * (x.ndim - 2), mode="nearest")
+
+
+def decontaminate(img, alpha):
+    """Give the subject's outer few pixels the subject's colour, not the backdrop's.
+
+    The mockup's glow sits partly INSIDE the matte, so the soft edge alone is
+    not enough: everything within ~5 px of the silhouette is in scope. Colour
+    from the subject's interior is pushed outward by normalised convolution,
+    and the rim is pulled toward it -- but only where the rim is BRIGHTER than
+    the interior behind it, which is what the glow is. Darker or equal edge
+    detail is left exactly as it was.
+    """
+    inside = alpha > 0.5
+    depth = distance_transform_edt(inside)
+    deep = (depth > 5).astype(np.float32)
+    inner = img.copy()
+    filled = deep > 0.5
+    for s in (2.0, 4.0, 8.0):  # nearest scale first, wider only where needed
+        w = gauss(deep, s)
+        prop = gauss(img * deep[..., None], s) / np.maximum(w, 1e-4)[..., None]
+        take = ~filled & (w > 0.02)
+        inner[take] = prop[take]
+        filled |= take
+    rim = np.where(inside, np.clip((6 - depth) / 3, 0, 1), 1.0) * (alpha > 0.01)
+    lift = np.clip((luma(img) - luma(inner) - 0.015) / 0.08, 0, 1)
+    w = (0.9 * rim * lift)[..., None]
+    out = img * (1 - w) + inner * w
+    return out, np.clip((alpha - 0.10) / 0.90, 0, 1)
+
+
+def finish(px, a, skin_mask):
+    """Polish at output size. Colour stays where it is; only tone and acuity."""
+    L = luma(px)
+
+    # 1 -- chroma denoise: compression blotches live in colour, detail in luma
+    chroma = px - L[..., None]
+    chroma = chroma * 0.4 + gauss(chroma, 1.1) * 0.6
+    px = np.clip(L[..., None] + chroma, 0, 1)
+
+    # 2 -- tone: a gentle S on luminance, with a small toe so the hair keeps
+    # its strands. Applied as a ratio, so hue and saturation hold.
+    s = L * L * (3 - 2 * L)
+    L2 = L + 0.16 * (s - L) + 0.018 * (1 - L) ** 6
+    # Ratio above ~0.08 luma; additive (neutral) below, where a ratio would
+    # multiply one surviving channel into coloured speckles in the hair.
+    ratio = px * (L2 / np.maximum(L, 1e-4))[..., None]
+    shift = px + (L2 - L)[..., None]
+    t = np.clip((L - 0.04) / 0.08, 0, 1)[..., None]
+    px = np.clip(ratio * t + shift * (1 - t), 0, 1)
+
+    # 3 -- acuity, luminance only. Fine detail for eyes, brows, hair and
+    # fabric weave; a little mid-scale clarity for form. Skin gets ~half, so
+    # pores stay pores. Nothing within ~3 px of the matte edge is touched,
+    # which is what keeps halos off the silhouette.
+    Lp = luma(px)
+    fine = Lp - gaussian_filter(Lp, 0.9, mode="nearest")
+    fine = np.sign(fine) * np.clip(np.abs(fine) - 0.004, 0, None)  # noise floor
+    mid = Lp - gaussian_filter(Lp, 4.0, mode="nearest")
+    core = gaussian_filter((a > 0.97).astype(np.float32), 1.5, mode="nearest")
+    core = np.clip((core - 0.5) * 2, 0, 1)
+    gain = core * (1 - 0.5 * skin_mask)
+    delta = (0.55 * fine + 0.12 * mid) * gain
+    out = px + delta[..., None]
+    return np.clip(out, 0, 1)
+
+
+def skin(img):
+    """Soft warm-skin mask, only used to ease sharpening on the face."""
+    h, s, mx = hsv(img)
+    w = (
+        np.clip((h - 2) / 8, 0, 1)
+        * np.clip((52 - h) / 14, 0, 1)
+        * np.clip((s - 0.14) / 0.10, 0, 1)
+        * np.clip((0.80 - s) / 0.16, 0, 1)
+        * np.clip((mx - 0.10) / 0.10, 0, 1)
+    )
+    return gaussian_filter(w, 3.0, mode="nearest")
+
+
 def main():
     src = Image.open(SRC).convert("RGB")
     W, H = src.size
@@ -231,8 +326,12 @@ def main():
     band = (np.clip((0.97 - alpha) / 0.45, 0, 1) * (alpha > 0.02))[..., None]
     work = np.clip(work * (1 - band) + np.clip(fg, 0, 1) * band, 0, 1)
 
-    # 5 + 6 -- colour, then crop
+    # 5 + 6 -- colour, then edge decontamination
     work = neutralise(work, MAGENTA, SHIRT_Y)
+    # framing below is still measured on the unchoked matte, so the crop holds
+    work, matte = decontaminate(work, alpha)
+
+    # 7 -- crop
 
     head = alpha[ys.min() : ys.min() + 360]
     hx = np.where(head.sum(0) > 0.5)[0]
@@ -244,7 +343,7 @@ def main():
     print("crop    (%d,%d)+%dx%d  head cx=%d" % (left, top, cw, ch, cx))
 
     px = work[top:H, left : left + cw]
-    a = alpha[top:H, left : left + cw]
+    a = matte[top:H, left : left + cw]
     if (cw, ch) != OUT_SIZE:
         # Uniform scale only: the crop is already 4:5, so nothing stretches.
         print("scale   %dx%d -> %dx%d" % ((cw, ch) + OUT_SIZE))
@@ -261,11 +360,14 @@ def main():
         a = np.asarray(Image.fromarray(a).resize(OUT_SIZE, Image.LANCZOS), np.float32)
         px, a = np.clip(px, 0, 1), np.clip(a, 0, 1)
 
-    Image.fromarray((np.dstack([px, a]) * 255).astype(np.uint8), "RGBA").save(
+    # 8 -- finish
+    px = finish(px, a, skin(px))
+
+    Image.fromarray((np.dstack([px, a]) * 255 + 0.5).astype(np.uint8), "RGBA").save(
         OUT_PNG, optimize=True
     )
     flat = px * a[..., None] + BG * (1 - a[..., None])
-    Image.fromarray((flat * 255).astype(np.uint8)).save(
+    Image.fromarray((flat * 255 + 0.5).astype(np.uint8)).save(
         OUT_JPG, quality=JPEG_QUALITY, subsampling=0, optimize=True, progressive=True
     )
     for p in (OUT_JPG, OUT_PNG):
